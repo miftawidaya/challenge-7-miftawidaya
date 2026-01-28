@@ -8,7 +8,7 @@ pada alur dasar: eksplor menu, filter & pencarian, keranjang, dan checkout seder
 
 # Repo Backend & Figma
 
-- Backend : https://be-restaurant-api-889893107835.asia-southeast2.run.app/apiswagger/
+- Backend : https://restaurant-be-400174736012.asia-southeast2.run.app/api-swagger/#/Authentication/post_api_auth_login
 
 - [Figma Design Link](https://www.figma.com/design/1By7DB1gDCNEoW62UqLUrA/Restaurant-App?node-id=2210-441096&t=Mb8iKuBNaG5z903g-1)
 
@@ -119,13 +119,3 @@ The evaluation for this assignment will be based on the following criteria:
 2.  **Routing and rendering method:** How you manage routing and rendering method (CSR, SSR, SSG)
 3.  **Next js advance features and optimizations:** How you use next js optimized tools like next/image etc.
 4.  **Deployment & best practice:** How you deploy your app on vercel
-
----
-
-# How to Upload your Challenge
-
-Check this module: [click this](https://orchid-clematis-3e4.notion.site/Panduan-Penggunaan-Git-Untuk-Upload-Assignment-e2d80a19b3684f5d8f1a4209dcf85445?pvs=73)
-
----
-
-🎉 Congratulations on working on this assignment! Utilize the _playground_ feature in Figma to help you understand how the design should look on various devices. Keep experimenting and don't hesitate to look for references if you encounter difficulties. You can definitely produce great work! 🚀 Keep up the spirit, cheers! 🎈
