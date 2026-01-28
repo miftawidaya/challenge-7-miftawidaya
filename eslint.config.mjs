@@ -1,64 +1,31 @@
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-import { FlatCompat } from '@eslint/eslintrc';
-import importPlugin from 'eslint-plugin-import';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+import eslintConfigPrettier from 'eslint-config-prettier/flat';
+import pluginNext from '@next/eslint-plugin-next';
+import tseslint from 'typescript-eslint';
 
 const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier'),
   {
     plugins: {
-      import: importPlugin,
+      '@next/next': pluginNext,
     },
     rules: {
-      'import/order': [
+      ...pluginNext.configs.recommended.rules,
+      ...pluginNext.configs['core-web-vitals'].rules,
+    },
+  },
+  ...tseslint.configs.recommended,
+  {
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': [
         'error',
-        {
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            ['parent', 'sibling'],
-            'index',
-            'object',
-          ],
-          'newlines-between': 'always',
-          pathGroups: [
-            {
-              pattern: '@/components/**',
-              group: 'internal',
-              position: 'before',
-            },
-            {
-              pattern: '@app/**',
-              group: 'external',
-              position: 'after',
-            },
-          ],
-          pathGroupsExcludedImportTypes: ['builtin'],
-          alphabetize: {
-            order: 'asc',
-            caseInsensitive: true,
-          },
-        },
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
     },
-    ignores: ['components/ui/**'],
   },
   {
-    files: ['**/*.ts', '**/*.tsx'],
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/ban-ts-comment': 'off',
-    },
+    ignores: ['components/ui/**', '.next/**', 'node_modules/**'],
   },
+  eslintConfigPrettier,
 ];
 
 export default eslintConfig;
