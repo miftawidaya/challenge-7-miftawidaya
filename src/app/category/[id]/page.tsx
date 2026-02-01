@@ -9,10 +9,15 @@
 import * as React from 'react';
 import { useParams } from 'next/navigation';
 import { FilterContent } from '@/components/home/FilterContent';
+import { RestaurantGrid } from '@/components/menu/RestaurantGrid';
+import { useRestaurants } from '@/services/queries';
 
 export default function CategoryPage() {
   const { id } = useParams();
   const categoryId = typeof id === 'string' ? id : 'all';
+  const { data: restaurants, isLoading } = useRestaurants({
+    category: categoryId,
+  });
 
   const getCategoryLabel = (id: string) => {
     if (id === 'all') return 'All Restaurant';
@@ -44,17 +49,11 @@ export default function CategoryPage() {
           {/* 3. Main Content Column (Filtered Grid) */}
           <main className='flex flex-1 flex-col'>
             <section>
-              <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-                {/* Mocked Cards for preview */}
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div
-                    key={i}
-                    className='flex h-(--height-restaurant-card-mock) items-center justify-center rounded-2xl border border-neutral-100 bg-neutral-50 text-neutral-400'
-                  >
-                    Restaurant Card {i}
-                  </div>
-                ))}
-              </div>
+              <RestaurantGrid
+                restaurants={restaurants}
+                isLoading={isLoading}
+                columns={2}
+              />
 
               {/* Show More Button - Figma Style */}
               <div className='mt-12 flex justify-center'>

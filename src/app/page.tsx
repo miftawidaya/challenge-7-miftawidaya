@@ -10,7 +10,12 @@ import * as React from 'react';
 import { HeroSection } from '@/components/home/HeroSection';
 import { CategoryFilter } from '@/components/home/CategoryFilter';
 
+import { RestaurantGrid } from '@/components/menu/RestaurantGrid';
+import { useRecommendedRestaurants } from '@/services/queries';
+
 export default function Home() {
+  const { data: recommended, isLoading } = useRecommendedRestaurants();
+
   return (
     <div className='flex flex-col'>
       {/* 1. Hero Section - Persistent on home */}
@@ -36,17 +41,7 @@ export default function Home() {
               </button>
             </div>
 
-            <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-              {/* Mocked Cards for preview */}
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <div
-                  key={i}
-                  className='flex h-(--height-restaurant-card-mock) items-center justify-center rounded-2xl border border-neutral-100 bg-neutral-50 text-neutral-400'
-                >
-                  Restaurant Card {i}
-                </div>
-              ))}
-            </div>
+            <RestaurantGrid restaurants={recommended} isLoading={isLoading} />
           </section>
         </main>
       </div>
