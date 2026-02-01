@@ -112,6 +112,10 @@
 
   /* Layout */
   --spacing-container-max: 78rem; /* 1248px */
+
+  /* Custom Tokens */
+  --shadow-card: 0px 0px 20px rgba(203, 202, 202, 0.25);
+  --width-dropdown: 12.3125rem; /* 197px */
 }
 
 /* ============================================ */
