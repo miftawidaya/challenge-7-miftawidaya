@@ -1,7 +1,8 @@
-import clsx from 'clsx';
+import * as React from 'react';
 import type { Metadata } from 'next';
 import { Nunito } from 'next/font/google';
 import { Providers } from './providers';
+import { MainLayout } from '@/components/layout/MainLayout';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -26,9 +27,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en' suppressHydrationWarning>
-      <body className={clsx(nunito.variable, 'antialiased')}>
-        <Providers>{children}</Providers>
+    <html lang='en' className={nunito.variable} suppressHydrationWarning>
+      <body className='font-sans antialiased'>
+        <Providers>
+          <MainLayout>{children}</MainLayout>
+        </Providers>
       </body>
     </html>
   );
