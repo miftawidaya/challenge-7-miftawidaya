@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { MarkerPin01, File05, ArrowCircleBrokenLeft } from '@untitledui/icons';
+import { useLogout } from '@/services/queries/useAuth';
 import { cn } from '@/lib/utils';
 
 type ProfileMenuProps = Readonly<{
@@ -31,9 +32,11 @@ type ProfileMenuProps = Readonly<{
 
 export function ProfileMenu({
   name,
-  avatarUrl = 'https://github.com/mifta.png',
+  avatarUrl,
   isScrolled = false,
 }: ProfileMenuProps) {
+  const logout = useLogout();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -80,7 +83,10 @@ export function ProfileMenu({
             <File05 className='size-5' strokeWidth={2} />
             <span className='text-sm font-medium'>My Orders</span>
           </DropdownMenuItem>
-          <DropdownMenuItem className='cursor-pointer gap-2 rounded-xl p-0 text-neutral-950'>
+          <DropdownMenuItem
+            className='cursor-pointer gap-2 rounded-xl p-0 text-neutral-950'
+            onSelect={() => logout()}
+          >
             <ArrowCircleBrokenLeft className='size-5' strokeWidth={2} />
             <span className='text-sm font-medium'>Logout</span>
           </DropdownMenuItem>

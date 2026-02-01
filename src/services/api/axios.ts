@@ -7,7 +7,6 @@ import Cookies from 'js-cookie';
  * Now uses Cookies for token storage to support Next.js SSR/Middleware compatibility.
  */
 const api: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },

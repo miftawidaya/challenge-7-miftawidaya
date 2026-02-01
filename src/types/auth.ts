@@ -14,11 +14,14 @@ export interface User {
   createdAt: string;
 }
 
-export interface AuthResponse {
-  success: boolean;
-  message: string;
-  data: {
-    user: User;
-    token: string;
-  };
+export interface AuthData {
+  user: User;
+  token: string;
+}
+
+export type LoginInput = Pick<User, 'email'> & { password: string };
+
+export interface RegisterInput extends LoginInput {
+  name: string;
+  phone: string;
 }
