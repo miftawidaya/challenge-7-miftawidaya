@@ -9,6 +9,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons';
 import { Icon } from '@iconify/react';
@@ -20,10 +21,16 @@ import { cn } from '@/lib/utils';
 const SCROLL_THRESHOLD = 20;
 
 export function Navbar() {
+  const pathname = usePathname();
+  const isHome = pathname === '/';
+
   const [isScrolled, setIsScrolled] = React.useState(false);
   const { user, isAuthenticated } = useSelector(
     (state: RootState) => state.auth
   );
+
+  // If NOT on home, it should always behave as "scrolled" (solid background)
+  const shouldBeSolid = !isHome || isScrolled;
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -38,7 +45,7 @@ export function Navbar() {
     <header
       className={cn(
         'z-header fixed inset-x-0 top-0 transition-all duration-300 ease-in-out',
-        isScrolled
+        shouldBeSolid
           ? 'h-header-mobile bg-base-white lg:h-header shadow-sm'
           : 'h-header-mobile lg:h-header bg-transparent shadow-none'
       )}
@@ -52,13 +59,13 @@ export function Navbar() {
           <Logo
             className={cn(
               'duration-header size-10 transition-colors group-hover:animate-spin md:size-10.5',
-              isScrolled ? 'text-primary' : 'text-base-white'
+              shouldBeSolid ? 'text-primary' : 'text-base-white'
             )}
           />
           <span
             className={cn(
               'text-display-md duration-header hidden font-extrabold transition-colors md:block',
-              isScrolled ? 'text-neutral-950' : 'text-base-white'
+              shouldBeSolid ? 'text-neutral-950' : 'text-base-white'
             )}
           >
             Foody
@@ -74,7 +81,7 @@ export function Navbar() {
               size='icon'
               className={cn(
                 'duration-header relative size-11 rounded-full p-0 transition-colors',
-                isScrolled
+                shouldBeSolid
                   ? 'text-neutral-900 hover:bg-neutral-100'
                   : 'text-base-white hover:bg-white/10'
               )}
@@ -90,7 +97,7 @@ export function Navbar() {
             <ProfileMenu
               name={user.name}
               avatarUrl={user.avatar ?? undefined}
-              isScrolled={isScrolled}
+              isScrolled={shouldBeSolid}
             />
           </div>
         ) : (
@@ -101,7 +108,7 @@ export function Navbar() {
                 variant='outline'
                 className={cn(
                   'md:min-w-btn-auth h-10 rounded-full px-6 font-bold transition-all md:h-12',
-                  isScrolled
+                  shouldBeSolid
                     ? 'border-neutral-300 text-neutral-950 hover:bg-neutral-50'
                     : 'border-white text-white hover:bg-white/10'
                 )}
@@ -115,7 +122,7 @@ export function Navbar() {
               <Button
                 className={cn(
                   'md:min-w-btn-auth h-10 rounded-full px-6 font-bold transition-all md:h-12',
-                  isScrolled
+                  shouldBeSolid
                     ? 'bg-brand-primary text-white hover:opacity-90'
                     : 'bg-white text-neutral-950 hover:bg-neutral-100'
                 )}

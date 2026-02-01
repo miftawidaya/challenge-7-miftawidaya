@@ -8,8 +8,6 @@
  * - Centered headline and subtitle
  * - Search bar for restaurant discovery
  * - Reveal animation on load
- *
- * Design follows Figma specifications with responsive breakpoints.
  */
 
 import * as React from 'react';

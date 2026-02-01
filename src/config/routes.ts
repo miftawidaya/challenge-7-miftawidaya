@@ -7,6 +7,7 @@ export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/register',
   RESTAURANTS: '/restaurants',
+  CATEGORY: (id: string | number) => `/category/${id}`,
   RESTAURANT_DETAIL: (id: string | number) => `/resto/${id}`,
   CART: '/cart',
   CHECKOUT: '/checkout',
