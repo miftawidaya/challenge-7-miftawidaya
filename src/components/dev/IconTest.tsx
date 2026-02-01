@@ -37,12 +37,12 @@ import {
 
 import { cn } from '@/lib/utils';
 
-interface IconItem {
+type IconItem = Readonly<{
   name: string;
   Icon?: React.ElementType; // For @untitledui/icons components
   iconName?: string; // For @iconify/react strings
   className?: string;
-}
+}>;
 
 const ICONS: IconItem[] = [
   { name: 'Calendar', Icon: Calendar },

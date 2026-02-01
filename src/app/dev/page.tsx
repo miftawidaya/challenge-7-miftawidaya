@@ -1,13 +1,17 @@
 import { ComponentTest, DesignSystemTest, IconTest } from '@/components/dev';
 
 /**
- * Home Page - Development Mode
- * @description Displays design system and component tests for development verification.
- * Replace with actual page content when ready for production.
+ * Development Test Page
+ * @description Displays design system, icons, and component tests for development verification.
+ * Accessible at /dev
  */
-export default function Home() {
+export default function DevPage() {
   return (
-    <main>
+    <main className='pb-20'>
+      <div className='bg-neutral-900 py-4 text-center text-white'>
+        <p className='text-sm font-medium'>Development Test Environment</p>
+      </div>
+
       {/* Design System Test - Typography, Colors, Spacing, Radius */}
       <DesignSystemTest />
 
