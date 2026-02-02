@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import {
   Sheet,
   SheetContent,
@@ -15,10 +14,10 @@ import { ROUTES } from '@/config/routes';
 import Link from 'next/link';
 import { CartGroup, CartItemNested } from '@/types';
 
-interface CartDrawerProps {
+type CartDrawerProps = Readonly<{
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-}
+}>;
 
 export function CartDrawer({ isOpen, onOpenChange }: CartDrawerProps) {
   const { data: cartData, isLoading } = useCart();
@@ -39,11 +38,13 @@ export function CartDrawer({ isOpen, onOpenChange }: CartDrawerProps) {
         </SheetHeader>
 
         <div className='flex-1 overflow-y-auto p-6'>
-          {isLoading ? (
+          {isLoading && (
             <div className='flex h-full items-center justify-center'>
               Loading...
             </div>
-          ) : !cartData?.length ? (
+          )}
+
+          {!isLoading && (cartData?.length ?? 0) === 0 && (
             <div className='flex h-full flex-col items-center justify-center text-center'>
               <Icon
                 icon='lets-icons:bag-fill'
@@ -56,9 +57,11 @@ export function CartDrawer({ isOpen, onOpenChange }: CartDrawerProps) {
                 Order your favorite food now!
               </p>
             </div>
-          ) : (
+          )}
+
+          {!isLoading && (cartData?.length ?? 0) > 0 && (
             <div className='flex flex-col gap-8'>
-              {cartData.map((group: CartGroup) => (
+              {cartData?.map((group: CartGroup) => (
                 <div key={group.restaurant.id} className='flex flex-col gap-4'>
                   <div className='flex items-center gap-2'>
                     <Icon

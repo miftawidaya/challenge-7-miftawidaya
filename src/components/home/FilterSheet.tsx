@@ -7,7 +7,6 @@
  * On desktop, this component is generally not used as the filter is persistent in the sidebar.
  */
 
-import * as React from 'react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { FilterContent } from './FilterContent';
 import { cn } from '@/lib/utils';
@@ -17,7 +16,10 @@ interface FilterSheetProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function FilterSheet({ isOpen, onOpenChange }: FilterSheetProps) {
+export function FilterSheet({
+  isOpen,
+  onOpenChange,
+}: Readonly<FilterSheetProps>) {
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent

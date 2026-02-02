@@ -30,9 +30,9 @@ const categories = [
   { id: 'lunch', label: 'Lunch', icon: '/images/category-lunch.png' },
 ];
 
-interface CategoryFilterProps {
+type CategoryFilterProps = Readonly<{
   activeCategory?: string;
-}
+}>;
 
 export function CategoryFilter({ activeCategory = '' }: CategoryFilterProps) {
   const router = useRouter();
@@ -74,13 +74,13 @@ export function CategoryFilter({ activeCategory = '' }: CategoryFilterProps) {
             <div
               className={cn(
                 'shadow-card flex items-center justify-center rounded-2xl bg-white transition-all',
-                'h-(--height-category-item) w-full',
+                'h-category-item w-full',
                 activeCategory === category.id
                   ? 'ring-brand-primary ring-2'
                   : 'hover:ring-1 hover:ring-neutral-200'
               )}
             >
-              <div className='relative size-12 md:size-(--size-category-icon-desktop)'>
+              <div className='md:size-category-icon-desktop relative size-12'>
                 <Image
                   src={category.icon}
                   alt={category.label}

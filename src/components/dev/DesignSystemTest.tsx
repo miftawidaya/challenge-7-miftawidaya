@@ -1,7 +1,7 @@
 /**
  * DesignSystemTest Component
  *
- * Test component to verify Figma design system tokens from globals.css.
+ * Test component to verify  design system tokens from globals.css.
  * This component displays typography, colors, spacing, and radius tokens visually.
  *
  * @remarks
@@ -65,7 +65,7 @@ export function DesignSystemTest() {
           Design System Test
         </h1>
         <p className='text-md text-muted-foreground'>
-          Verify Figma design tokens from{' '}
+          Verify  design tokens from{' '}
           <code className='bg-muted rounded-sm px-1'>globals.css</code>
         </p>
       </header>

@@ -2,8 +2,7 @@
 
 /**
  * Category Page
- * @description Page for showing restaurants by category with a persistent sidebar filter.
- * Matches Figma specifications for the filtered view.
+ * Matches specifications for the filtered view.
  */
 
 import * as React from 'react';
@@ -55,7 +54,7 @@ export default function CategoryPage() {
                 columns={2}
               />
 
-              {/* Show More Button - Figma Style */}
+              {/* Show More Button */}
               <div className='mt-12 flex justify-center'>
                 <button
                   type='button'

@@ -1,7 +1,7 @@
 /**
  * IconTest Component
  *
- * Test component to verify Untitled UI icons and Iconify icons according to Figma.
+ * Test component to verify Untitled UI icons and Iconify icons according to .
  * This component displays icons from @untitledui/icons and @iconify/react.
  *
  * @remarks
@@ -91,7 +91,7 @@ export function IconTest() {
           Icons - UPDATED (Iconify)
         </h2>
         <p className='text-md text-muted-foreground'>
-          Verify icons from Figma using{' '}
+          Verify icons from  using{' '}
           <code className='bg-muted rounded-sm px-1'>@untitledui/icons</code>{' '}
           and <code className='bg-muted rounded-sm px-1'>@iconify/react</code>
         </p>

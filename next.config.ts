@@ -6,6 +6,22 @@ const nextConfig: NextConfig = {
    * Proxies requests to /api/* through Next.js to avoid CORS issues during development.
    * The backend API is at https://be-restaurant-api-889893107835.asia-southeast2.run.app
    */
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'logos-world.net',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.googleusercontent.com',
+      },
+    ],
+  },
   async rewrites() {
     return [
       {

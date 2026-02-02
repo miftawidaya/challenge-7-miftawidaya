@@ -3,9 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ============================================ */
-/* PRIMITIVE TOKENS (Design System from Figma) */
-/* ============================================ */
+/* PRIMITIVE TOKENS (Design System) */
 @theme {
   /* Text Sizes and Line Heights */
   --text-display-3xl: 3.75rem;
@@ -316,7 +314,7 @@
 /* ============================================ */
 @layer base {
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
   }
 
   body {

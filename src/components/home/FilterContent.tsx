@@ -4,7 +4,7 @@
  * FilterContent Component
  *
  * The core filter logic and UI shared between the Mobile Sheet and Desktop Sidebar.
- * Matches Figma specifications for Distance, Price, and Rating sections.
+ * Matches specifications for Distance, Price, and Rating sections.
  */
 
 import * as React from 'react';
@@ -12,10 +12,10 @@ import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 
-interface FilterContentProps {
+type FilterContentProps = Readonly<{
   className?: string;
   showTitle?: boolean;
-}
+}>;
 
 export function FilterContent({
   className,
@@ -52,7 +52,7 @@ export function FilterContent({
             </div>
             <Input
               placeholder='Minimum Price'
-              className='focus-visible:ring-brand-primary/20 h-12 border-neutral-300 pl-(--padding-price-input-left) text-sm font-medium placeholder:text-neutral-400 focus-visible:ring-1'
+              className='focus-visible:ring-brand-primary/20 pl-price-input-left h-12 border-neutral-300 text-sm font-medium placeholder:text-neutral-400 focus-visible:ring-1'
             />
           </div>
           <div className='relative'>
@@ -61,7 +61,7 @@ export function FilterContent({
             </div>
             <Input
               placeholder='Maximum Price'
-              className='focus-visible:ring-brand-primary/20 h-12 border-neutral-300 pl-(--padding-price-input-left) text-sm font-medium placeholder:text-neutral-400 focus-visible:ring-1'
+              className='focus-visible:ring-brand-primary/20 pl-price-input-left h-12 border-neutral-300 text-sm font-medium placeholder:text-neutral-400 focus-visible:ring-1'
             />
           </div>
         </div>
@@ -73,25 +73,19 @@ export function FilterContent({
       {/* Rating Filter */}
       <FilterGroup title='Rating'>
         {[5, 4, 3, 2, 1].map((star) => (
-          <FilterOption
-            key={star}
-            label={star.toString()}
-            isRating
-            rating={star}
-          />
+          <FilterOption key={star} label={star.toString()} isRating />
         ))}
       </FilterGroup>
     </div>
   );
 }
 
-function FilterGroup({
-  title,
-  children,
-}: {
+type FilterGroupProps = Readonly<{
   title: string;
   children: React.ReactNode;
-}) {
+}>;
+
+function FilterGroup({ title, children }: FilterGroupProps) {
   return (
     <div className='flex flex-col gap-4'>
       <h4 className='text-md font-bold text-neutral-950'>{title}</h4>
@@ -100,12 +94,11 @@ function FilterGroup({
   );
 }
 
-interface FilterOptionProps {
+type FilterOptionProps = Readonly<{
   label: string;
   isSelected?: boolean;
   isRating?: boolean;
-  rating?: number;
-}
+}>;
 
 function FilterOption({
   label,

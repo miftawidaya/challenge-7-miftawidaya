@@ -79,7 +79,7 @@ export function ComponentTest() {
           id='buttons-heading'
           className='text-display-sm text-foreground font-bold'
         >
-          Buttons (Figma Customized)
+          Buttons ( Customized)
         </h2>
 
         <div className='space-y-6xl'>
@@ -124,7 +124,7 @@ export function ComponentTest() {
           id='sheets-heading'
           className='text-display-sm text-foreground font-bold'
         >
-          Sheets (Figma Filter Demo)
+          Sheets ( Filter Demo)
         </h2>
 
         <div className='gap-4xl bg-card p-4xl flex flex-wrap rounded-2xl border border-neutral-200'>
@@ -197,7 +197,7 @@ export function ComponentTest() {
           id='profile-dropdown-heading'
           className='text-display-sm text-foreground font-bold'
         >
-          Profile Dropdown (Figma Spec)
+          Profile Dropdown ( Spec)
         </h2>
         <div className='gap-4xl bg-card p-4xl flex flex-wrap rounded-2xl border border-neutral-200'>
           <DropdownMenu>
