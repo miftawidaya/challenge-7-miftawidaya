@@ -76,6 +76,7 @@ export type OrderStatus = 'PENDING' | 'PREPARING' | 'DELIVERED' | 'CANCELLED';
 
 export interface Order {
   id: string;
+  restaurantId: string | number;
   restaurantName: string;
   restaurantImage: string;
   totalAmount: number;

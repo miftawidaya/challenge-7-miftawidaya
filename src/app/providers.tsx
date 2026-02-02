@@ -6,6 +6,8 @@ import { Provider } from 'react-redux';
 
 import { store } from '@/features/store';
 import { queryClient } from '@/lib/queryClient';
+import { CartSync } from '@/components/cart/CartSync';
+import { AuthInitializer } from '@/components/auth/AuthInitializer';
 
 /**
  * Global App Providers
@@ -19,7 +21,10 @@ export function Providers({
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        {children}
+        <AuthInitializer>
+          <CartSync />
+          {children}
+        </AuthInitializer>
         {/* React Query Devtools - Only visible in development */}
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>

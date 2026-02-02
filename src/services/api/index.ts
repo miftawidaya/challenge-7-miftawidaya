@@ -90,7 +90,9 @@ export const restaurantService = {
   },
   getRecommended: async () => {
     const { data } = await axios.get(API_ENDPOINTS.RESTAURANTS.RECOMMENDED);
-    return (data.data.restaurants || []).map(mapRestaurant);
+    const restaurants =
+      data.data.recommendations || data.data.restaurants || [];
+    return restaurants.map(mapRestaurant);
   },
 };
 
@@ -127,5 +129,26 @@ export const orderService = {
   checkout: async (payload: Record<string, unknown>) => {
     const { data } = await axios.post(API_ENDPOINTS.ORDERS.CHECKOUT, payload);
     return data.data;
+  },
+};
+
+export const reviewService = {
+  create: async (payload: {
+    restaurantId: string | number;
+    star: number;
+    comment: string;
+  }) => {
+    const { data } = await axios.post(API_ENDPOINTS.REVIEWS.CREATE, payload);
+    return data.data;
+  },
+  getMyReviews: async () => {
+    const { data } = await axios.get(API_ENDPOINTS.REVIEWS.MY_REVIEWS);
+    return data.data.reviews;
+  },
+  getRestaurantReviews: async (restaurantId: string | number) => {
+    const { data } = await axios.get(
+      API_ENDPOINTS.REVIEWS.RESTAURANT_REVIEWS(restaurantId)
+    );
+    return (data.data.reviews || []).map(mapReview);
   },
 };

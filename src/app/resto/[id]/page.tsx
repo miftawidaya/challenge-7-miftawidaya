@@ -1,16 +1,46 @@
 'use client';
 
-import * as React from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Icon } from '@iconify/react';
-import { useRestaurantDetail } from '@/services/queries';
+import { useRestaurantDetail, useAddToCart } from '@/services/queries';
 import { MenuCard, ReviewCard } from '@/components/menu/MenuElements';
+import { MenuItem } from '@/types';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/features/store';
+import { ROUTES } from '@/config/routes';
 
 export default function RestaurantDetailPage() {
-  const { id } = useParams();
-  const { data: restaurant, isLoading } = useRestaurantDetail(id as string);
+  const { id: restaurantId } = useParams();
+  const router = useRouter();
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+  const { data: restaurant, isLoading } = useRestaurantDetail(
+    restaurantId as string
+  );
+  const addToCart = useAddToCart();
+
+  const handleAddToCart = (item: MenuItem) => {
+    if (!isAuthenticated) {
+      // Save pending item
+      const pendingItem = {
+        restaurantId: restaurantId as string,
+        menuId: item.id,
+        quantity: 1,
+      };
+      localStorage.setItem('pending_cart_item', JSON.stringify(pendingItem));
+      router.push(ROUTES.LOGIN);
+      return;
+    }
+
+    addToCart.mutate({
+      restaurantId: restaurantId as string,
+      menuId: item.id,
+      quantity: 1,
+    });
+  };
 
   if (isLoading)
     return (
@@ -91,7 +121,11 @@ export default function RestaurantDetailPage() {
                 </h3>
                 <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
                   {foods.map((item) => (
-                    <MenuCard key={item.id} item={item} />
+                    <MenuCard
+                      key={item.id}
+                      item={item}
+                      onAdd={handleAddToCart}
+                    />
                   ))}
                 </div>
               </div>
@@ -101,7 +135,11 @@ export default function RestaurantDetailPage() {
                 </h3>
                 <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
                   {drinks.map((item) => (
-                    <MenuCard key={item.id} item={item} />
+                    <MenuCard
+                      key={item.id}
+                      item={item}
+                      onAdd={handleAddToCart}
+                    />
                   ))}
                 </div>
               </div>

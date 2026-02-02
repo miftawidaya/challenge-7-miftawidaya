@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -12,19 +11,19 @@ import { MenuItem, Review } from '@/types';
 export function StarRating({
   rating,
   size = 'sm',
-}: {
+}: Readonly<{
   rating: number;
   size?: 'sm' | 'md';
-}) {
+}>) {
   return (
     <div className='flex items-center gap-1'>
-      {Array.from({ length: 5 }).map((_, i) => (
+      {[1, 2, 3, 4, 5].map((star) => (
         <Icon
-          key={i}
+          key={star}
           icon='ri:star-fill'
           className={cn(
             size === 'sm' ? 'size-4' : 'size-5',
-            i < Math.floor(rating) ? 'text-rating' : 'text-neutral-200'
+            star <= rating ? 'text-rating' : 'text-neutral-200'
           )}
         />
       ))}
@@ -38,10 +37,10 @@ export function StarRating({
 export function MenuCard({
   item,
   onAdd,
-}: {
+}: Readonly<{
   item: MenuItem;
   onAdd?: (item: MenuItem) => void;
-}) {
+}>) {
   return (
     <div className='flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm transition-all hover:shadow-md'>
       <div className='relative size-20 shrink-0 overflow-hidden rounded-xl bg-neutral-100 md:size-24'>
@@ -78,7 +77,7 @@ export function MenuCard({
 /**
  * ReviewCard
  */
-export function ReviewCard({ review }: { review: Review }) {
+export function ReviewCard({ review }: Readonly<{ review: Review }>) {
   return (
     <div className='flex flex-col gap-3 rounded-2xl border border-neutral-100 p-4'>
       <div className='flex items-center justify-between'>

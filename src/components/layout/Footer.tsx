@@ -7,7 +7,6 @@
 
 'use client';
 
-import * as React from 'react';
 import Link from 'next/link';
 import { Icon } from '@iconify/react';
 import { Logo } from '@/components/icons';
@@ -38,7 +37,7 @@ const SOCIAL_LINKS = [
 
 export function Footer() {
   return (
-    <footer className='border-t border-neutral-300 bg-neutral-950 py-10 ps-4 pe-4 md:py-20 lg:ps-30 lg:pe-30'>
+    <footer className='border-t border-neutral-300 bg-neutral-950 py-10 md:py-20'>
       <div className='custom-container mx-auto flex flex-col gap-6 md:flex-row md:justify-between md:gap-17'>
         {/* Brand & Description Column */}
         <div className='flex flex-col gap-10 md:w-95 md:shrink-0'>
@@ -66,10 +65,13 @@ export function Footer() {
                 <Link
                   key={social.name}
                   href={social.href}
-                  className='flex size-10 items-center justify-center rounded-full border border-neutral-800 transition-colors hover:bg-white/5'
+                  className='hover:border-brand-primary hover:bg-brand-primary/10 group flex size-10 items-center justify-center rounded-full border border-neutral-800 transition-all'
                   aria-label={`Follow us on ${social.name}`}
                 >
-                  <Icon icon={social.icon} className='text-neutral-25 size-5' />
+                  <Icon
+                    icon={social.icon}
+                    className='text-neutral-25 group-hover:text-brand-primary size-5 transition-colors'
+                  />
                 </Link>
               ))}
             </div>
@@ -88,7 +90,7 @@ export function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className='text-neutral-25 md:text-md text-sm transition-colors hover:text-white'
+                    className='text-neutral-25 md:text-md hover:text-brand-primary cursor-pointer text-sm transition-colors'
                   >
                     {link.label}
                   </Link>
@@ -107,7 +109,7 @@ export function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className='text-neutral-25 md:text-md text-sm transition-colors hover:text-white'
+                    className='text-neutral-25 md:text-md hover:text-brand-primary cursor-pointer text-sm transition-colors'
                   >
                     {link.label}
                   </Link>

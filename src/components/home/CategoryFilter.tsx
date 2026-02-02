@@ -48,15 +48,13 @@ export function CategoryFilter({ activeCategory = '' }: CategoryFilterProps) {
   };
 
   return (
-    <section className='w-full pb-3 md:pb-12' aria-label='Food categories'>
+    <section className='w-full' aria-label='Food categories'>
       {/* Mobile-only Filter Sheet */}
       <FilterSheet isOpen={isFilterOpen} onOpenChange={setIsFilterOpen} />
 
       <div
         className={cn(
-          'mx-auto flex items-center',
-          'flex-wrap justify-center gap-(--spacing-category-gap-mobile)',
-          'md:gap-category-gap-desktop md:w-full md:flex-nowrap md:justify-between md:p-0'
+          'grid w-full grid-cols-3 gap-5 md:flex md:items-center md:justify-between'
         )}
       >
         {categories.map((category) => (
@@ -66,7 +64,7 @@ export function CategoryFilter({ activeCategory = '' }: CategoryFilterProps) {
             onClick={() => handleCategoryClick(category.id)}
             className={cn(
               'flex flex-col items-center gap-1 transition-transform outline-none hover:scale-105 md:gap-1.5',
-              'w-category-item-mobile md:w-category-item-desktop'
+              'md:w-category-item-desktop group w-full cursor-pointer'
             )}
             aria-pressed={activeCategory === category.id}
           >
@@ -94,8 +92,9 @@ export function CategoryFilter({ activeCategory = '' }: CategoryFilterProps) {
             {/* Label */}
             <span
               className={cn(
-                'text-center font-bold tracking-tight whitespace-nowrap text-neutral-950',
+                'text-center font-bold tracking-tight whitespace-nowrap text-neutral-950 transition-colors',
                 'text-sm leading-7 md:text-lg md:leading-8',
+                'group-hover:text-brand-primary',
                 activeCategory === category.id ? 'text-brand-primary' : ''
               )}
             >

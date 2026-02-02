@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en' className={nunito.variable} suppressHydrationWarning>
-      <body className='font-sans antialiased'>
+      <body className='font-sans antialiased' suppressHydrationWarning>
         <Providers>
           <MainLayout>{children}</MainLayout>
         </Providers>

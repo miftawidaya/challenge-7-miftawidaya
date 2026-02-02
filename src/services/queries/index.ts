@@ -1,5 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { restaurantService, cartService, orderService } from '@/services/api';
+import {
+  restaurantService,
+  cartService,
+  orderService,
+  reviewService,
+} from '@/services/api';
 import { Restaurant, RestaurantDetail, Order, CartGroup } from '@/types';
 
 // Restaurant Hooks
@@ -76,6 +81,20 @@ export const useCheckout = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['cart'] });
+    },
+  });
+};
+
+// Review Hooks
+export const useCreateReview = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: reviewService.create,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['restaurant', String(variables.restaurantId)],
+      });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
   });
 };

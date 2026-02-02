@@ -6,9 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Order } from '@/types';
+import { Button } from '@/components/ui/button';
+import { ReviewDialog } from '@/components/orders/ReviewDialog';
 
 export default function OrdersPage() {
   const { data: orders, isLoading } = useOrders();
+  const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
 
   return (
     <div className='custom-container mx-auto flex flex-col gap-10 py-32'>
@@ -23,10 +26,10 @@ export default function OrdersPage() {
           {orders?.map((order: Order) => (
             <div
               key={order.id}
-              className='flex items-center justify-between gap-6 rounded-2xl border border-neutral-100 p-6'
+              className='flex flex-col gap-4 rounded-2xl border border-neutral-100 p-6 md:flex-row md:items-center md:justify-between'
             >
               <div className='flex items-center gap-6'>
-                <div className='relative size-20 overflow-hidden rounded-xl bg-neutral-100'>
+                <div className='relative size-20 shrink-0 overflow-hidden rounded-xl bg-neutral-100'>
                   <Image
                     src={order.restaurantImage || '/images/placeholder.png'}
                     alt={order.restaurantName}
@@ -46,20 +49,41 @@ export default function OrdersPage() {
                   </span>
                 </div>
               </div>
-              <Badge
-                variant='outline'
-                className={cn(
-                  'rounded-lg px-4 py-1.5 text-xs font-bold uppercase',
-                  order.status === 'DELIVERED'
-                    ? 'bg-status-success/10 text-status-success border-status-success/20'
-                    : 'bg-status-warning/10 text-status-warning border-status-warning/20'
+              <div className='flex items-center gap-4'>
+                <Badge
+                  variant='outline'
+                  className={cn(
+                    'rounded-lg px-4 py-1.5 text-xs font-bold uppercase',
+                    order.status === 'DELIVERED'
+                      ? 'bg-status-success/10 text-status-success border-status-success/20'
+                      : 'bg-status-warning/10 text-status-warning border-status-warning/20'
+                  )}
+                >
+                  {order.status}
+                </Badge>
+                {order.status === 'DELIVERED' && (
+                  <Button
+                    variant='secondary'
+                    size='sm'
+                    className='rounded-xl font-bold'
+                    onClick={() => setSelectedOrder(order)}
+                  >
+                    Give Review
+                  </Button>
                 )}
-              >
-                {order.status}
-              </Badge>
+              </div>
             </div>
           ))}
         </div>
+      )}
+
+      {selectedOrder && (
+        <ReviewDialog
+          isOpen={!!selectedOrder}
+          onOpenChange={(open) => !open && setSelectedOrder(null)}
+          restaurantId={selectedOrder.restaurantId}
+          restaurantName={selectedOrder.restaurantName}
+        />
       )}
     </div>
   );
