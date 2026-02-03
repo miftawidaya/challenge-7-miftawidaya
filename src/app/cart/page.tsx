@@ -211,7 +211,7 @@ export default function CartPage() {
         </h1>
 
         {/* Loading State */}
-        {isLoading && (
+        {(isLoading || (isAuthenticated && !cartData)) && (
           <div className='flex flex-col gap-4'>
             {[1, 2].map((i) => (
               <div
@@ -223,12 +223,12 @@ export default function CartPage() {
         )}
 
         {/* Empty State */}
-        {!isLoading && (cartData?.length ?? 0) === 0 && <EmptyCartState />}
+        {!isLoading && cartData && cartData.length === 0 && <EmptyCartState />}
 
         {/* Cart Groups */}
-        {!isLoading && (cartData?.length ?? 0) > 0 && (
+        {!isLoading && cartData && cartData.length > 0 && (
           <div className='flex flex-col gap-5 md:gap-6'>
-            {cartData?.map((group: CartGroup) => (
+            {cartData.map((group: CartGroup) => (
               <CartRestaurantGroup
                 key={group.restaurant.id}
                 group={group}
