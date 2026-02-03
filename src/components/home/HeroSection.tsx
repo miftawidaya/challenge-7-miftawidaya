@@ -14,18 +14,23 @@ import * as React from 'react';
 import Image from 'next/image';
 import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
+import { ROUTES } from '@/config/routes';
 
 /**
  * SearchBar Component (Internal)
  * Renders a rounded search input with icon for restaurant search.
  */
 function SearchBar() {
+  const router = useRouter();
   const [query, setQuery] = React.useState('');
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (query.trim()) {
-      // TODO: Navigate to search results page
+      router.push(
+        `${ROUTES.CATEGORY('all')}?search=${encodeURIComponent(query)}`
+      );
     }
   };
 

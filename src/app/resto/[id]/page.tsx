@@ -26,16 +26,25 @@ import {
 } from '@/config/constants';
 import { cn } from '@/lib/utils';
 import React from 'react';
+import { useLocation } from '@/context/LocationContext';
 
 export default function RestaurantDetailPage() {
   const { id: restaurantId } = useParams();
   const router = useRouter();
+  const { latitude, longitude, isLoading: isLoadingLocation } = useLocation();
+
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
-  const { data: restaurant, isLoading } = useRestaurantDetail(
-    restaurantId as string
+  const { data: restaurant, isLoading: isLoadingData } = useRestaurantDetail(
+    restaurantId as string,
+    {
+      ...(latitude !== null && { lat: latitude }),
+      ...(longitude !== null && { lng: longitude }),
+    }
   );
+
+  const isLoading = isLoadingLocation || isLoadingData;
   const addToCart = useAddToCart();
   const updateQuantity = useUpdateCartQuantity();
   const removeFromCart = useRemoveFromCart();
@@ -194,7 +203,7 @@ export default function RestaurantDetailPage() {
     );
 
   // Derived data
-  const filteredMenu = restaurant.menu.filter((item) => {
+  const filteredMenu = (restaurant.menu || []).filter((item) => {
     if (activeCategory === 'ALL') return true;
     return item.category === activeCategory;
   });
@@ -202,8 +211,11 @@ export default function RestaurantDetailPage() {
   const visibleMenus = filteredMenu.slice(0, visibleMenuCount);
   const hasMoreMenus = visibleMenuCount < filteredMenu.length;
 
-  const visibleReviews = restaurant.reviews.slice(0, visibleReviewCount);
-  const hasMoreReviews = visibleReviewCount < restaurant.reviews.length;
+  const visibleReviews = (restaurant.reviews || []).slice(
+    0,
+    visibleReviewCount
+  );
+  const hasMoreReviews = visibleReviewCount < (restaurant.reviews?.length || 0);
 
   const galleryImages = restaurant.images || [];
 
@@ -439,7 +451,7 @@ export default function RestaurantDetailPage() {
                 className='text-rating size-4.5 md:size-6'
               />
               <span className='text-md font-extrabold text-neutral-950 md:text-xl'>
-                {restaurant.rating} ({restaurant.totalReview} Reviews)
+                {restaurant.rating} ({restaurant.totalReview ?? 0} Reviews)
               </span>
             </div>
           </div>

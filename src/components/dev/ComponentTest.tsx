@@ -12,7 +12,12 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   DropdownMenu,
@@ -140,6 +145,7 @@ export function ComponentTest() {
               className='w-78 overflow-visible p-0'
               showCloseButton
             >
+              <SheetTitle className='sr-only'>Filter Demo</SheetTitle>
               <div className='flex-1 space-y-8 overflow-y-auto p-6'>
                 <h3 className='text-display-xs font-bold uppercase'>Filter</h3>
                 <div className='space-y-4'>

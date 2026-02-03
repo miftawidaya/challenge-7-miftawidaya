@@ -3,10 +3,13 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { Icon } from '@iconify/react';
-import { cn } from '@/lib/utils';
+import { cn, calculateDistance } from '@/lib/utils';
 import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 import { Restaurant } from '@/types';
 import { ROUTES } from '@/config/routes';
+import { useLocation } from '@/context/LocationContext';
+import { useRestaurantDetail } from '@/services/queries';
+import { DEFAULT_DISTANCE } from '@/config/constants';
 
 type RestaurantCardProps = Readonly<{
   restaurant: Restaurant;
@@ -14,6 +17,49 @@ type RestaurantCardProps = Readonly<{
 }>;
 
 export function RestaurantCard({ restaurant, className }: RestaurantCardProps) {
+  const { latitude: userLat, longitude: userLng } = useLocation();
+
+  // Background hydration: Fetch detail if coordinates are missing
+  const needsHydration =
+    restaurant.lat === undefined || restaurant.lng === undefined;
+
+  const { data: detail } = useRestaurantDetail(restaurant.id, undefined, {
+    enabled: needsHydration,
+    staleTime: 1000 * 60 * 60, // 1 hour cache
+  });
+
+  // Calculate dynamic distance
+  const displayDistance = React.useMemo(() => {
+    // 1. If we have a calculated distance from the API/initial data that isn't the default
+    if (restaurant.distance !== DEFAULT_DISTANCE) {
+      return restaurant.distance;
+    }
+
+    // 2. Try to calculate from user location + (initial coords OR hydrated coords)
+    const rLat = restaurant.lat ?? detail?.lat;
+    const rLng = restaurant.lng ?? detail?.lng;
+
+    if (
+      userLat !== null &&
+      userLng !== null &&
+      rLat !== undefined &&
+      rLng !== undefined
+    ) {
+      return calculateDistance(userLat, userLng, rLat, rLng);
+    }
+
+    // Fallback
+    return restaurant.distance;
+  }, [
+    restaurant.distance,
+    restaurant.lat,
+    restaurant.lng,
+    detail?.lat,
+    detail?.lng,
+    userLat,
+    userLng,
+  ]);
+
   return (
     <Link
       href={ROUTES.RESTAURANT_DETAIL(restaurant.id)}
@@ -56,7 +102,7 @@ export function RestaurantCard({ restaurant, className }: RestaurantCardProps) {
           </span>
           <div className='size-0.5 shrink-0 rounded-full bg-neutral-950' />
           <span className='md:text-md shrink-0 text-sm font-normal tracking-[-0.02em] text-neutral-950'>
-            {restaurant.distance} km
+            {displayDistance} km
           </span>
         </div>
       </div>

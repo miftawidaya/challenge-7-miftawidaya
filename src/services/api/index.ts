@@ -1,6 +1,7 @@
 import axios from './axios';
 import { API_ENDPOINTS } from '@/config/api';
 import { DEFAULT_DISTANCE } from '@/config/constants';
+import { calculateDistance } from '@/lib/utils';
 import {
   Restaurant,
   RestaurantDetail,
@@ -23,6 +24,16 @@ interface ApiRestaurant {
   totalReviews?: number;
   place?: string;
   distance?: string | number;
+  lat?: number | string;
+  long?: number | string;
+  lng?: number | string;
+  latitude?: number | string;
+  longitude?: number | string;
+  coordinates?: {
+    lat: number | string;
+    long?: number | string;
+    lng?: number | string;
+  };
   category?: string;
   menus?: ApiMenuItem[];
   reviews?: ApiReview[];
@@ -68,17 +79,71 @@ interface ApiCartGroup {
 /**
  * Mapping helpers to transform API response to our types
  */
-const mapRestaurant = (data: ApiRestaurant): Restaurant => ({
-  id: String(data.id),
-  name: data.name,
-  image: data.images?.[0] || data.logo || '',
-  rating: data.averageRating ?? data.star ?? 0,
-  totalReview: data.reviewCount ?? data.totalReviews ?? 0,
-  place: data.place ?? '',
-  distance: data.distance ?? DEFAULT_DISTANCE,
-  category: data.category ?? '',
-  logo: data.logo,
-});
+/**
+ * Helper to parse latitude from various API formats
+ */
+const parseLat = (data: ApiRestaurant): number | undefined => {
+  const val = data.lat ?? data.latitude ?? data.coordinates?.lat;
+  return val !== undefined && val !== null ? Number(val) : undefined;
+};
+
+/**
+ * Helper to parse longitude from various API formats
+ */
+const parseLng = (data: ApiRestaurant): number | undefined => {
+  const val =
+    data.lng ??
+    data.long ??
+    data.longitude ??
+    data.coordinates?.lng ??
+    data.coordinates?.long;
+  return val !== undefined && val !== null ? Number(val) : undefined;
+};
+
+const mapRestaurant = (
+  data: ApiRestaurant,
+  userCoords?: { lat?: number; lng?: number }
+): Restaurant => {
+  const rLat = parseLat(data);
+  const rLong = parseLng(data);
+
+  // 1. Try to get distance from API
+  let distance = data.distance;
+
+  // 2. If API doesn't provide distance but coordinates are available
+  if (
+    (distance === undefined || distance === null) &&
+    userCoords?.lat !== undefined &&
+    userCoords?.lng !== undefined &&
+    rLat !== undefined &&
+    rLong !== undefined
+  ) {
+    distance = calculateDistance(userCoords.lat, userCoords.lng, rLat, rLong);
+  }
+
+  // Fallback to default if still not available
+  distance = distance ?? DEFAULT_DISTANCE;
+
+  // Extract numeric distance if it comes as a string (e.g. "2.4 km")
+  if (typeof distance === 'string') {
+    const numeric = distance.replaceAll(/[^0-9.]/g, '');
+    distance = numeric ? Number.parseFloat(numeric) : DEFAULT_DISTANCE;
+  }
+
+  return {
+    id: String(data.id),
+    name: data.name,
+    image: data.images?.[0] || data.logo || '',
+    rating: data.averageRating ?? data.star ?? 0,
+    totalReview: data.reviewCount ?? data.totalReviews ?? 0,
+    place: data.place ?? '',
+    distance,
+    category: data.category ?? '',
+    logo: data.logo,
+    lat: rLat,
+    lng: rLong,
+  };
+};
 
 const mapMenuItem = (data: ApiMenuItem): MenuItem => ({
   id: String(data.id),
@@ -100,15 +165,40 @@ const mapReview = (data: ApiReview): Review => ({
 
 export const restaurantService = {
   getRestaurants: async (params?: Record<string, unknown>) => {
-    const { data } = await axios.get(API_ENDPOINTS.RESTAURANTS.LIST, {
+    let endpoint: string = API_ENDPOINTS.RESTAURANTS.LIST;
+
+    // Route special categories to their dedicated endpoints
+    if (params?.category === 'nearby') {
+      endpoint = API_ENDPOINTS.RESTAURANTS.NEARBY;
+    } else if (params?.category === 'best-seller') {
+      endpoint = API_ENDPOINTS.RESTAURANTS.BEST_SELLER;
+    } else if (params?.category === 'recommended') {
+      endpoint = API_ENDPOINTS.RESTAURANTS.RECOMMENDED;
+    }
+
+    const { data } = await axios.get(endpoint, {
       params,
     });
-    return (data.data.restaurants || []).map(mapRestaurant);
+
+    const result = data.data;
+    const restaurants = Array.isArray(result)
+      ? result
+      : result.restaurants || result.recommendations || [];
+
+    const userCoords =
+      params?.lat !== undefined && params?.lng !== undefined
+        ? { lat: Number(params.lat), lng: Number(params.lng) }
+        : undefined;
+
+    return restaurants.map((r: ApiRestaurant) => mapRestaurant(r, userCoords));
   },
-  getDetail: async (id: string): Promise<RestaurantDetail> => {
+  getDetail: async (
+    id: string,
+    params?: { lat?: number; lng?: number }
+  ): Promise<RestaurantDetail> => {
     const { data } = await axios.get(API_ENDPOINTS.RESTAURANTS.DETAIL(id));
     const resto = data.data;
-    const mappedBase = mapRestaurant(resto);
+    const mappedBase = mapRestaurant(resto, params);
 
     return {
       ...mappedBase,
@@ -117,11 +207,19 @@ export const restaurantService = {
       reviews: (resto.reviews || []).map(mapReview),
     };
   },
-  getRecommended: async () => {
-    const { data } = await axios.get(API_ENDPOINTS.RESTAURANTS.RECOMMENDED);
+  getRecommended: async (params?: Record<string, unknown>) => {
+    const { data } = await axios.get(API_ENDPOINTS.RESTAURANTS.RECOMMENDED, {
+      params,
+    });
     const restaurants =
       data.data.recommendations || data.data.restaurants || [];
-    return restaurants.map(mapRestaurant);
+
+    const userCoords =
+      params?.lat !== undefined && params?.lng !== undefined
+        ? { lat: Number(params.lat), lng: Number(params.lng) }
+        : undefined;
+
+    return restaurants.map((r: ApiRestaurant) => mapRestaurant(r, userCoords));
   },
 };
 

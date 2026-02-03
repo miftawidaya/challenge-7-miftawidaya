@@ -223,7 +223,7 @@ export default function CartPage() {
         )}
 
         {/* Empty State */}
-        {!isLoading && cartData && cartData.length === 0 && <EmptyCartState />}
+        {!isLoading && cartData?.length === 0 && <EmptyCartState />}
 
         {/* Cart Groups */}
         {!isLoading && cartData && cartData.length > 0 && (

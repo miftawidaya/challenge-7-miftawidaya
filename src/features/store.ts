@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import authReducer from './auth/authSlice';
+import filterReducer from './filter/filterSlice';
 
 /**
  * Root Reducer Configuration
@@ -8,6 +9,7 @@ import authReducer from './auth/authSlice';
  */
 const rootReducer = {
   auth: authReducer,
+  filter: filterReducer,
 };
 
 /**

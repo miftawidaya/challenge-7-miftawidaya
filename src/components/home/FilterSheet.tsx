@@ -7,9 +7,11 @@
  * On desktop, this component is generally not used as the filter is persistent in the sidebar.
  */
 
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { FilterContent } from './FilterContent';
 import { cn } from '@/lib/utils';
+import { useDispatch } from 'react-redux';
+import { resetFilters } from '@/features/filter/filterSlice';
 
 interface FilterSheetProps {
   isOpen: boolean;
@@ -20,12 +22,19 @@ export function FilterSheet({
   isOpen,
   onOpenChange,
 }: Readonly<FilterSheetProps>) {
+  const dispatch = useDispatch();
+
+  const handleClear = () => {
+    dispatch(resetFilters());
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent
         side='left'
         className={cn('flex flex-col border-none p-0', 'w-full sm:max-w-md')}
       >
+        <SheetTitle className='sr-only'>Filters</SheetTitle>
         {/* Scrollable area for filters */}
         <div className='flex-1 overflow-y-auto p-6'>
           <FilterContent />
@@ -36,7 +45,7 @@ export function FilterSheet({
           <button
             type='button'
             className='flex-1 rounded-xl border border-neutral-200 py-3 text-sm font-bold text-neutral-950 transition-colors hover:bg-neutral-50'
-            onClick={() => onOpenChange(false)}
+            onClick={handleClear}
           >
             Clear All
           </button>

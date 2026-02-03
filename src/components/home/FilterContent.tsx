@@ -11,6 +11,14 @@ import * as React from 'react';
 import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '@/features/store';
+import {
+  setMinPrice,
+  setMaxPrice,
+  setRating,
+  setDistance,
+} from '@/features/filter/filterSlice';
 
 type FilterContentProps = Readonly<{
   className?: string;
@@ -21,6 +29,11 @@ export function FilterContent({
   className,
   showTitle = true,
 }: FilterContentProps) {
+  const dispatch = useDispatch();
+  const { minPrice, maxPrice, rating, distance } = useSelector(
+    (state: RootState) => state.filter
+  );
+
   return (
     <div className={cn('flex flex-col gap-8', className)}>
       {showTitle && (
@@ -35,7 +48,10 @@ export function FilterContent({
           <FilterOption
             key={dist}
             label={dist}
-            isSelected={dist === 'Nearby'}
+            isSelected={distance === dist}
+            onToggle={() =>
+              dispatch(setDistance(distance === dist ? null : dist))
+            }
           />
         ))}
       </FilterGroup>
@@ -51,6 +67,8 @@ export function FilterContent({
               Rp
             </div>
             <Input
+              value={minPrice}
+              onChange={(e) => dispatch(setMinPrice(e.target.value))}
               placeholder='Minimum Price'
               className='focus-visible:ring-brand-primary/20 pl-price-input-left h-12 border-neutral-300 text-sm font-medium placeholder:text-neutral-400 focus-visible:ring-1'
             />
@@ -60,6 +78,8 @@ export function FilterContent({
               Rp
             </div>
             <Input
+              value={maxPrice}
+              onChange={(e) => dispatch(setMaxPrice(e.target.value))}
               placeholder='Maximum Price'
               className='focus-visible:ring-brand-primary/20 pl-price-input-left h-12 border-neutral-300 text-sm font-medium placeholder:text-neutral-400 focus-visible:ring-1'
             />
@@ -73,7 +93,13 @@ export function FilterContent({
       {/* Rating Filter */}
       <FilterGroup title='Rating'>
         {[5, 4, 3, 2, 1].map((star) => (
-          <FilterOption key={star} label={star.toString()} isRating />
+          <FilterOption
+            key={star}
+            label={star.toString()}
+            isRating
+            isSelected={rating === star}
+            onToggle={() => dispatch(setRating(rating === star ? null : star))}
+          />
         ))}
       </FilterGroup>
     </div>
@@ -98,31 +124,31 @@ type FilterOptionProps = Readonly<{
   label: string;
   isSelected?: boolean;
   isRating?: boolean;
+  onToggle: () => void;
 }>;
 
 function FilterOption({
   label,
   isSelected = false,
   isRating = false,
+  onToggle,
 }: FilterOptionProps) {
-  const [active, setActive] = React.useState(isSelected);
-
   return (
     <button
       type='button'
-      onClick={() => setActive(!active)}
+      onClick={onToggle}
       className='group flex cursor-pointer items-center gap-3 outline-none'
     >
       {/* Checkbox Box */}
       <div
         className={cn(
           'flex size-5 shrink-0 items-center justify-center rounded border transition-all',
-          active
+          isSelected
             ? 'bg-brand-primary border-brand-primary shadow-sm'
             : 'border-neutral-300 bg-white group-hover:border-neutral-400'
         )}
       >
-        {active && (
+        {isSelected && (
           <Icon
             icon='heroicons:check-16-solid'
             className='size-3.5 text-white'
@@ -139,7 +165,7 @@ function FilterOption({
         <span
           className={cn(
             'text-sm transition-colors',
-            active ? 'font-semibold text-neutral-950' : 'text-neutral-600'
+            isSelected ? 'font-semibold text-neutral-950' : 'text-neutral-600'
           )}
         >
           {label}

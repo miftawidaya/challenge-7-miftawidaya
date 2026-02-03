@@ -17,6 +17,7 @@ import { ROUTES } from '@/config/routes';
 import { useRecommendedRestaurants } from '@/services/queries';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/features/store';
+import { useLocation } from '@/context/LocationContext';
 import {
   RECOMMENDED_INITIAL_COUNT,
   RECOMMENDED_LOAD_INCREMENT,
@@ -24,8 +25,19 @@ import {
 
 export default function Home() {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
-  const { data: recommended, isLoading } =
-    useRecommendedRestaurants(isAuthenticated);
+  const { latitude, longitude, isLoading: isLoadingLocation } = useLocation();
+
+  const { data: recommended, isLoading: isLoadingData } =
+    useRecommendedRestaurants(
+      isAuthenticated,
+      {
+        ...(latitude !== null && { lat: latitude }),
+        ...(longitude !== null && { lng: longitude }),
+      },
+      { enabled: !isLoadingLocation }
+    );
+
+  const isLoading = isLoadingLocation || isLoadingData;
 
   const [visibleCount, setVisibleCount] = React.useState(
     RECOMMENDED_INITIAL_COUNT

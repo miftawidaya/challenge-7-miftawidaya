@@ -10,9 +10,10 @@ export const queryKeys = {
     list: (params?: Record<string, unknown>) =>
       [...queryKeys.restaurants.lists(), params] as const,
     details: () => [...queryKeys.restaurants.all, 'detail'] as const,
-    detail: (id: string) => [...queryKeys.restaurants.details(), id] as const,
-    recommended: (isAuthenticated?: boolean) =>
-      [...queryKeys.restaurants.all, 'recommended', isAuthenticated] as const,
+    detail: (id: string, params?: Record<string, unknown>) =>
+      [...queryKeys.restaurants.details(), id, params] as const,
+    recommended: (params?: Record<string, unknown>) =>
+      [...queryKeys.restaurants.all, 'recommended', params] as const,
   },
   cart: {
     all: ['cart'] as const,

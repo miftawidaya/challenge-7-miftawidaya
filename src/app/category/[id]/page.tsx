@@ -6,17 +6,60 @@
  */
 
 import * as React from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { FilterContent } from '@/components/home/FilterContent';
 import { RestaurantGrid } from '@/components/menu/RestaurantGrid';
 import { useRestaurants } from '@/services/queries';
+import { Button } from '@/components/ui/button';
+import { useLocation } from '@/context/LocationContext';
+import {
+  RECOMMENDED_INITIAL_COUNT,
+  RECOMMENDED_LOAD_INCREMENT,
+} from '@/config/constants';
+import { FilterSheet } from '@/components/home/FilterSheet';
+import { FilterLines } from '@untitledui/icons';
+import { cn } from '@/lib/utils';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/features/store';
 
 export default function CategoryPage() {
   const { id } = useParams();
+  const searchParams = useSearchParams();
+  const search = searchParams.get('search') ?? '';
   const categoryId = typeof id === 'string' ? id : 'all';
-  const { data: restaurants, isLoading } = useRestaurants({
-    category: categoryId,
-  });
+  const {
+    latitude,
+    longitude,
+    isLoading: isLoadingLocation,
+    requestLocation,
+  } = useLocation();
+
+  const { minPrice, maxPrice, rating, distance } = useSelector(
+    (state: RootState) => state.filter
+  );
+
+  // Automatically request location if "nearby" is selected
+  React.useEffect(() => {
+    if (categoryId === 'nearby') {
+      requestLocation();
+    }
+  }, [categoryId, requestLocation]);
+
+  const { data: restaurants, isLoading: isLoadingData } = useRestaurants(
+    {
+      ...(categoryId !== 'all' && { category: categoryId }),
+      ...(latitude !== null && { lat: latitude }),
+      ...(longitude !== null && { lng: longitude }),
+      ...(minPrice && { minPrice }),
+      ...(maxPrice && { maxPrice }),
+      ...(rating && { rating }),
+      ...(distance && { distanceFilter: distance }), // renamed to avoid conflict with numeric distance
+      ...(search && { search }),
+    },
+    { enabled: !isLoadingLocation }
+  );
+
+  const isLoading = isLoadingLocation || isLoadingData;
 
   const getCategoryLabel = (id: string) => {
     if (id === 'all') return 'All Restaurant';
@@ -27,8 +70,25 @@ export default function CategoryPage() {
       .join(' ');
   };
 
+  const [visibleCount, setVisibleCount] = React.useState(
+    RECOMMENDED_INITIAL_COUNT
+  );
+
+  const handleShowMore = () => {
+    setVisibleCount((prev) => prev + RECOMMENDED_LOAD_INCREMENT);
+  };
+
+  const visibleRestaurants = restaurants?.slice(0, visibleCount);
+  const hasMore = restaurants && visibleCount < restaurants.length;
+  const isListLongEnough =
+    restaurants && restaurants.length >= RECOMMENDED_INITIAL_COUNT;
+
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
+
   return (
     <div className='flex flex-col pt-24 pb-20 md:pt-32 md:pb-40'>
+      <FilterSheet isOpen={isFilterOpen} onOpenChange={setIsFilterOpen} />
+
       <div className='custom-container mx-auto flex flex-col'>
         {/* Title (Above the split) */}
         <div className='mb-8 md:mb-12'>
@@ -36,6 +96,25 @@ export default function CategoryPage() {
             {getCategoryLabel(categoryId)}
           </h2>
         </div>
+
+        {/* Mobile Filter Trigger */}
+        <button
+          type='button'
+          onClick={() => setIsFilterOpen(true)}
+          className={cn(
+            'shadow-card bg-base-white relative mb-10 flex h-13 w-full items-center justify-center rounded-xl transition-transform active:scale-95 lg:hidden'
+          )}
+        >
+          <span className='px-6 text-sm font-extrabold text-neutral-950'>
+            Filter
+          </span>
+          <div className='absolute end-4'>
+            <FilterLines
+              className='size-5 text-neutral-950'
+              strokeWidth={2.5}
+            />
+          </div>
+        </button>
 
         <div className='flex flex-col gap-10 lg:flex-row'>
           {/* 2. Left Sidebar Filter - Persistent on this page */}
@@ -49,20 +128,31 @@ export default function CategoryPage() {
           <main className='flex flex-1 flex-col'>
             <section>
               <RestaurantGrid
-                restaurants={restaurants}
+                restaurants={visibleRestaurants}
                 isLoading={isLoading}
                 columns={2}
               />
 
-              {/* Show More Button */}
-              <div className='mt-12 flex justify-center'>
-                <button
-                  type='button'
-                  className='cursor-pointer rounded-xl border border-neutral-200 px-8 py-3 text-sm font-bold text-neutral-900 transition-colors hover:bg-neutral-50'
-                >
-                  Show More
-                </button>
-              </div>
+              {/* Pagination Logic */}
+              {isListLongEnough && (
+                <div className='mt-4 flex min-h-10 items-center justify-center md:mt-8 md:min-h-12'>
+                  {hasMore ||
+                  (visibleCount === RECOMMENDED_INITIAL_COUNT &&
+                    isListLongEnough) ? (
+                    <Button
+                      variant='outline'
+                      onClick={handleShowMore}
+                      className='md:text-md h-10 w-40 text-sm leading-7 md:h-12 md:leading-7.5'
+                    >
+                      Show More
+                    </Button>
+                  ) : (
+                    <p className='text-md font-medium text-neutral-500 italic'>
+                      No more restaurants to show
+                    </p>
+                  )}
+                </div>
+              )}
             </section>
           </main>
         </div>

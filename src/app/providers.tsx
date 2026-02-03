@@ -8,6 +8,7 @@ import { store } from '@/features/store';
 import { queryClient } from '@/lib/queryClient';
 import { CartSync } from '@/components/cart/CartSync';
 import { AuthInitializer } from '@/components/auth/AuthInitializer';
+import { LocationProvider } from '@/context/LocationContext';
 
 /**
  * Global App Providers
@@ -21,10 +22,12 @@ export function Providers({
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <AuthInitializer>
-          <CartSync />
-          {children}
-        </AuthInitializer>
+        <LocationProvider>
+          <AuthInitializer>
+            <CartSync />
+            {children}
+          </AuthInitializer>
+        </LocationProvider>
         {/* React Query Devtools - Only visible in development */}
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>

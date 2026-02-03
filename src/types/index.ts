@@ -18,6 +18,8 @@ export interface Restaurant {
   distance: string | number;
   category: string;
   logo?: string;
+  lat?: number;
+  lng?: number;
 }
 
 export interface MenuItem {
