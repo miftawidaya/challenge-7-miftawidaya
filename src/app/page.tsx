@@ -9,9 +9,11 @@
 import * as React from 'react';
 import { HeroSection } from '@/components/home/HeroSection';
 import { CategoryFilter } from '@/components/home/CategoryFilter';
+import Link from 'next/link';
 
 import { RestaurantGrid } from '@/components/menu/RestaurantGrid';
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/config/routes';
 import { useRecommendedRestaurants } from '@/services/queries';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/features/store';
@@ -55,12 +57,12 @@ export default function Home() {
               <h2 className='text-display-xs font-extrabold text-neutral-950'>
                 Recommended
               </h2>
-              <button
-                type='button'
+              <Link
+                href={ROUTES.CATEGORY('all')}
                 className='text-brand-primary text-sm font-bold hover:underline'
               >
                 See All
-              </button>
+              </Link>
             </div>
 
             <RestaurantGrid
