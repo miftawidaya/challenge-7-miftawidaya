@@ -3,11 +3,11 @@
 import * as React from 'react';
 import { useOrders } from '@/services/queries';
 import { Badge } from '@/components/ui/badge';
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Order } from '@/types';
 import { Button } from '@/components/ui/button';
 import { ReviewDialog } from '@/components/orders/ReviewDialog';
+import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 
 export default function OrdersPage() {
   const { data: orders, isLoading } = useOrders();
@@ -30,11 +30,12 @@ export default function OrdersPage() {
             >
               <div className='flex items-center gap-6'>
                 <div className='relative size-20 shrink-0 overflow-hidden rounded-xl bg-neutral-100'>
-                  <Image
-                    src={order.restaurantImage || '/images/placeholder.png'}
+                  <ImageWithFallback
+                    src={order.restaurantImage}
                     alt={order.restaurantName}
                     fill
                     className='object-cover'
+                    fallbackIconSize='sm'
                   />
                 </div>
                 <div className='flex flex-col gap-1'>

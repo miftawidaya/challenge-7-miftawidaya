@@ -1,10 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Icon } from '@iconify/react';
 import { cn } from '@/lib/utils';
+import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 import { Restaurant } from '@/types';
 import { ROUTES } from '@/config/routes';
 
@@ -24,12 +24,13 @@ export function RestaurantCard({ restaurant, className }: RestaurantCardProps) {
     >
       {/* Thumbnail Container */}
       <div className='size-restaurant-thumb-mobile md:size-restaurant-thumb-desktop relative shrink-0 overflow-hidden rounded-xl bg-neutral-100'>
-        <Image
-          src={restaurant.image || '/images/placeholder.png'}
+        <ImageWithFallback
+          src={restaurant.image}
           alt={restaurant.name}
           fill
           className='object-cover transition-transform duration-500 group-hover:scale-105'
           sizes='(max-width: 768px) 90px, 120px'
+          fallbackIconSize='sm'
         />
       </div>
 

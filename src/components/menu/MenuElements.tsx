@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import Image from 'next/image';
 
 import { cn } from '@/lib/utils';
+import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 
 import type { MenuItem, Review } from '@/types';
 
@@ -56,12 +57,13 @@ export function MenuCard({
     <div className='shadow-card flex flex-col overflow-hidden rounded-3xl bg-white transition-all hover:shadow-md'>
       {/* Image Area - 1:1 ratio */}
       <div className='relative aspect-square w-full overflow-hidden bg-neutral-100'>
-        <Image
-          src={item.image || '/images/placeholder.png'}
+        <ImageWithFallback
+          src={item.image}
           alt={item.name}
           fill
           sizes='(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw'
           className='object-cover'
+          fallbackIconSize='md'
         />
       </div>
 

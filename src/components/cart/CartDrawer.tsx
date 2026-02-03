@@ -9,7 +9,7 @@ import {
 import { useCart } from '@/services/queries';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
-import Image from 'next/image';
+import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 import { ROUTES } from '@/config/routes';
 import Link from 'next/link';
 import { CartGroup, CartItemNested } from '@/types';
@@ -81,11 +81,12 @@ export function CartDrawer({
                     {group.items.map((item: CartItemNested) => (
                       <div key={item.id} className='flex items-center gap-4'>
                         <div className='relative size-16 shrink-0 overflow-hidden rounded-xl bg-neutral-100'>
-                          <Image
-                            src={item.menu.image || '/images/placeholder.png'}
+                          <ImageWithFallback
+                            src={item.menu.image}
                             alt={item.menu.foodName}
                             fill
                             className='object-cover'
+                            fallbackIconSize='sm'
                           />
                         </div>
                         <div className='flex flex-1 flex-col gap-1'>

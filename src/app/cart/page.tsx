@@ -3,6 +3,7 @@
 import { Icon } from '@iconify/react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/features/store';
 
@@ -24,21 +25,26 @@ function CartItemCard({
   onIncrement,
   onDecrement,
   isUpdating,
+  priority = false,
 }: Readonly<{
   item: CartItemNested;
   onIncrement: () => void;
   onDecrement: () => void;
   isUpdating: boolean;
+  priority?: boolean;
 }>) {
   return (
     <div className='flex items-center gap-3 md:gap-4'>
       {/* Image */}
       <div className='relative size-16 shrink-0 overflow-hidden rounded-xl bg-neutral-100 md:size-20'>
-        <Image
-          src={item.menu.image || '/images/placeholder.png'}
+        <ImageWithFallback
+          src={item.menu.image}
           alt={item.menu.foodName}
           fill
           className='object-cover'
+          fallbackIconSize='sm'
+          priority={priority}
+          sizes='(max-width: 768px) 64px, 80px'
         />
       </div>
 
@@ -105,6 +111,7 @@ function CartRestaurantGroup({
               src={group.restaurant.logo}
               alt={group.restaurant.name}
               fill
+              sizes='24px'
               className='object-cover'
             />
           </div>
@@ -122,13 +129,14 @@ function CartRestaurantGroup({
 
       {/* Items List */}
       <div className='flex flex-col gap-4'>
-        {group.items.map((item) => (
+        {group.items.map((item, index) => (
           <CartItemCard
             key={item.id}
             item={item}
             onIncrement={() => onUpdateQuantity(item.id, item.quantity + 1)}
             onDecrement={() => onUpdateQuantity(item.id, item.quantity - 1)}
             isUpdating={isUpdating}
+            priority={index === 0}
           />
         ))}
       </div>
