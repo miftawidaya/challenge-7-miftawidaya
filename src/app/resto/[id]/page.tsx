@@ -3,9 +3,17 @@
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Icon } from '@iconify/react';
-import { useRestaurantDetail, useAddToCart } from '@/services/queries';
+import {
+  useRestaurantDetail,
+  useAddToCart,
+  useCart,
+  useUpdateCartQuantity,
+  useRemoveFromCart,
+} from '@/services/queries';
 import { MenuCard, ReviewCard } from '@/components/menu/MenuElements';
-import { MenuItem } from '@/types';
+import { MenuItem, CartGroup, CartItemNested } from '@/types';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/features/store';
 import { ROUTES } from '@/config/routes';
@@ -29,6 +37,20 @@ export default function RestaurantDetailPage() {
     restaurantId as string
   );
   const addToCart = useAddToCart();
+  const updateQuantity = useUpdateCartQuantity();
+  const removeFromCart = useRemoveFromCart();
+  const { data: cartData } = useCart(isAuthenticated);
+
+  // Get cart data for current restaurant
+  const currentRestoCart = cartData?.find(
+    (group: CartGroup) => String(group.restaurant.id) === String(restaurantId)
+  );
+  const cartItemCount =
+    currentRestoCart?.items.reduce(
+      (sum: number, item: CartItemNested) => sum + item.quantity,
+      0
+    ) ?? 0;
+  const cartSubtotal = currentRestoCart?.subtotal ?? 0;
 
   // State for filtering and pagination
   const [activeCategory, setActiveCategory] = React.useState<
@@ -38,6 +60,16 @@ export default function RestaurantDetailPage() {
     React.useState(MENU_INITIAL_COUNT);
   const [visibleReviewCount, setVisibleReviewCount] =
     React.useState(REVIEW_INITIAL_COUNT);
+  const [isCartUpdating, setIsCartUpdating] = React.useState(false);
+
+  // Trigger animation when cart changes
+  React.useEffect(() => {
+    if (cartItemCount > 0) {
+      setIsCartUpdating(true);
+      const timer = setTimeout(() => setIsCartUpdating(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [cartItemCount, cartSubtotal]);
 
   const handleAddToCart = (item: MenuItem) => {
     if (!isAuthenticated) {
@@ -51,11 +83,55 @@ export default function RestaurantDetailPage() {
       return;
     }
 
-    addToCart.mutate({
+    const payload = {
       restaurantId: restaurantId as string,
       menuId: item.id,
       quantity: 1,
+    };
+    console.log('Adding to cart:', payload);
+
+    addToCart.mutate(payload, {
+      onError: (error) => {
+        console.error('Failed to add to cart:', error);
+        // If 401, token might be expired - redirect to login
+        if (
+          error &&
+          typeof error === 'object' &&
+          'response' in error &&
+          (error as { response?: { status?: number } }).response?.status === 401
+        ) {
+          router.push(ROUTES.LOGIN);
+        }
+      },
     });
+  };
+
+  const handleIncrement = (item: MenuItem) => {
+    const cartItem = currentRestoCart?.items.find(
+      (ci) => String(ci.menu.id) === String(item.id)
+    );
+    if (cartItem) {
+      updateQuantity.mutate({
+        itemId: cartItem.id,
+        quantity: cartItem.quantity + 1,
+      });
+    }
+  };
+
+  const handleDecrement = (item: MenuItem) => {
+    const cartItem = currentRestoCart?.items.find(
+      (ci) => String(ci.menu.id) === String(item.id)
+    );
+    if (cartItem) {
+      if (cartItem.quantity > 1) {
+        updateQuantity.mutate({
+          itemId: cartItem.id,
+          quantity: cartItem.quantity - 1,
+        });
+      } else {
+        removeFromCart.mutate(cartItem.id);
+      }
+    }
   };
 
   /**
@@ -144,6 +220,7 @@ export default function RestaurantDetailPage() {
                 src={galleryImages[0] || restaurant.image || ''}
                 alt={restaurant.name}
                 fill
+                sizes='(max-width: 768px) 100vw, 66vw'
                 className='object-cover'
                 priority
               />
@@ -154,6 +231,7 @@ export default function RestaurantDetailPage() {
                   src={galleryImages[1] || galleryImages[0] || ''}
                   alt={restaurant.name}
                   fill
+                  sizes='(max-width: 768px) 100vw, 33vw'
                   className='object-cover'
                 />
               </div>
@@ -163,6 +241,7 @@ export default function RestaurantDetailPage() {
                     src={galleryImages[2] || galleryImages[0] || ''}
                     alt={restaurant.name}
                     fill
+                    sizes='(max-width: 768px) 100vw, 16vw'
                     className='object-cover'
                   />
                 </div>
@@ -171,6 +250,7 @@ export default function RestaurantDetailPage() {
                     src={galleryImages[3] || galleryImages[0] || ''}
                     alt={restaurant.name}
                     fill
+                    sizes='(max-width: 768px) 100vw, 16vw'
                     className='object-cover'
                   />
                 </div>
@@ -184,6 +264,7 @@ export default function RestaurantDetailPage() {
               src={restaurant.image || ''}
               alt={restaurant.name}
               fill
+              sizes='(max-width: 768px) 100vw, 800px'
               className='object-cover'
               priority
             />
@@ -203,6 +284,7 @@ export default function RestaurantDetailPage() {
                   src={restaurant.logo || ''}
                   alt={`${restaurant.name} logo`}
                   fill
+                  sizes='(max-width: 768px) 80px, 120px'
                   className='object-contain p-2'
                 />
               </div>
@@ -242,7 +324,7 @@ export default function RestaurantDetailPage() {
               </div>
             </div>
 
-            {/* Share Button - Icon only on mobile, Icon + Text on desktop */}
+            {/* Share Button */}
             <button
               type='button'
               onClick={handleShare}
@@ -299,9 +381,21 @@ export default function RestaurantDetailPage() {
 
           {/* Menu Grid */}
           <div className='grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-x-5 md:gap-y-6 lg:grid-cols-4'>
-            {visibleMenus.map((item) => (
-              <MenuCard key={item.id} item={item} onAdd={handleAddToCart} />
-            ))}
+            {visibleMenus.map((item) => {
+              const cartItem = currentRestoCart?.items.find(
+                (ci: CartItemNested) => String(ci.menu.id) === String(item.id)
+              );
+              return (
+                <MenuCard
+                  key={item.id}
+                  item={item}
+                  onAdd={handleAddToCart}
+                  quantity={cartItem?.quantity ?? 0}
+                  onIncrement={handleIncrement}
+                  onDecrement={handleDecrement}
+                />
+              );
+            })}
           </div>
 
           {/* Show More Menu */}
@@ -312,7 +406,7 @@ export default function RestaurantDetailPage() {
                   onClick={() =>
                     setVisibleMenuCount((prev) => prev + MENU_LOAD_INCREMENT)
                   }
-                  className='h-12 rounded-full border border-neutral-200 px-10 font-bold text-neutral-950 transition-all hover:bg-neutral-50'
+                  className='h-12 cursor-pointer rounded-full border border-neutral-200 px-10 font-bold text-neutral-950 transition-all hover:bg-neutral-50'
                 >
                   Show More
                 </button>
@@ -367,7 +461,7 @@ export default function RestaurantDetailPage() {
                       (prev) => prev + REVIEW_LOAD_INCREMENT
                     )
                   }
-                  className='h-12 rounded-full border border-neutral-200 px-10 font-bold text-neutral-950 transition-all hover:bg-neutral-50'
+                  className='h-12 cursor-pointer rounded-full border border-neutral-200 px-10 font-bold text-neutral-950 transition-all hover:bg-neutral-50'
                 >
                   Show More
                 </button>
@@ -380,6 +474,52 @@ export default function RestaurantDetailPage() {
           )}
         </div>
       </section>
+
+      {/* Fixed Bottom Cart Bar */}
+      {cartItemCount > 0 && (
+        <div className='fixed inset-x-0 bottom-0 z-50 border-t border-neutral-100 bg-white shadow-lg'>
+          <div className='custom-container mx-auto flex h-16 items-center justify-between gap-4 md:h-20'>
+            {/* Left: Items count & Total */}
+            <div
+              className={cn(
+                'flex flex-col items-start gap-0.5 transition-transform',
+                isCartUpdating && 'animate-cart-pop'
+              )}
+            >
+              {/* Row 1: Icon + Items count (horizontal) */}
+              <div className='flex items-center gap-1 md:gap-2'>
+                <Icon
+                  icon='lets-icons:bag-fill'
+                  className='size-5 text-neutral-950 md:size-6'
+                />
+                <span className='md:text-md text-sm font-normal tracking-tight text-neutral-950'>
+                  {cartItemCount} {cartItemCount === 1 ? 'Item' : 'Items'}
+                </span>
+              </div>
+              {/* Row 2: Price */}
+              <span
+                key={cartSubtotal}
+                className={cn(
+                  'text-md font-extrabold text-neutral-950 md:text-xl',
+                  isCartUpdating && 'animate-number-slide-up'
+                )}
+              >
+                Rp{cartSubtotal.toLocaleString('id-ID')}
+              </span>
+            </div>
+
+            {/* Right: Checkout Button */}
+            <Link href={ROUTES.CHECKOUT}>
+              <Button className='md:text-md h-10 w-40 rounded-full text-sm font-bold md:h-11 md:w-57.5'>
+                Checkout
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Spacer for fixed bottom bar */}
+      {cartItemCount > 0 && <div className='h-16 md:h-20' />}
     </div>
   );
 }

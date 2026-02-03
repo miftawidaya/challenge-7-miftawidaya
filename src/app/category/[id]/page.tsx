@@ -30,7 +30,7 @@ export default function CategoryPage() {
   return (
     <div className='flex flex-col pt-24 pb-20 md:pt-32 md:pb-40'>
       <div className='custom-container mx-auto flex flex-col'>
-        {/* Judul (Above the split) */}
+        {/* Title (Above the split) */}
         <div className='mb-8 md:mb-12'>
           <h2 className='text-display-xs md:text-display-sm font-extrabold text-neutral-950'>
             {getCategoryLabel(categoryId)}
@@ -58,7 +58,7 @@ export default function CategoryPage() {
               <div className='mt-12 flex justify-center'>
                 <button
                   type='button'
-                  className='rounded-xl border border-neutral-200 px-8 py-3 text-sm font-bold text-neutral-900 transition-colors hover:bg-neutral-50'
+                  className='cursor-pointer rounded-xl border border-neutral-200 px-8 py-3 text-sm font-bold text-neutral-900 transition-colors hover:bg-neutral-50'
                 >
                   Show More
                 </button>

@@ -31,10 +31,11 @@ export const useRecommendedRestaurants = (isAuthenticated?: boolean) =>
   });
 
 // Cart Hooks
-export const useCart = () =>
+export const useCart = (isAuthenticated?: boolean) =>
   useQuery<CartGroup[]>({
     queryKey: ['cart'],
     queryFn: cartService.getCart,
+    enabled: !!isAuthenticated,
   });
 
 export const useAddToCart = () => {

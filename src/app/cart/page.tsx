@@ -3,6 +3,8 @@
 import { Icon } from '@iconify/react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/features/store';
 
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/config/routes';
@@ -165,7 +167,7 @@ function EmptyCartState() {
         Order your favorite food now!
       </p>
       <Link href={ROUTES.HOME} className='mt-6'>
-        <Button className='h-12 rounded-full px-8 text-sm font-bold'>
+        <Button className='h-12 rounded-full text-sm font-bold'>
           Browse Restaurants
         </Button>
       </Link>
@@ -177,7 +179,8 @@ function EmptyCartState() {
  * CartPage - Main cart page component
  */
 export default function CartPage() {
-  const { data: cartData, isLoading } = useCart();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { data: cartData, isLoading } = useCart(isAuthenticated);
   const updateQuantity = useUpdateCartQuantity();
   const removeFromCart = useRemoveFromCart();
 

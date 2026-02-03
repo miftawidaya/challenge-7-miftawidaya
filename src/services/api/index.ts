@@ -112,7 +112,16 @@ export const cartService = {
     menuId: number | string;
     quantity: number;
   }) => {
-    const { data } = await axios.post(API_ENDPOINTS.CART.ADD, payload);
+    // Ensure IDs are numbers as backend expects numeric values
+    const normalizedPayload = {
+      restaurantId: Number(payload.restaurantId),
+      menuId: Number(payload.menuId),
+      quantity: payload.quantity,
+    };
+    const { data } = await axios.post(
+      API_ENDPOINTS.CART.ADD,
+      normalizedPayload
+    );
     return data;
   },
   updateQuantity: async (itemId: string | number, quantity: number) => {

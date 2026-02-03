@@ -13,11 +13,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/features/store';
 import { CartGroup, CartItemNested } from '@/types';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { data: cartData } = useCart();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { data: cartData } = useCart(isAuthenticated);
   const checkout = useCheckout();
 
   const total =

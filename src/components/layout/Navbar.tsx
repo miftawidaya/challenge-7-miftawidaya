@@ -33,7 +33,7 @@ export function Navbar() {
     (state: RootState) => state.auth
   );
 
-  const { data: cartData } = useCart();
+  const { data: cartData } = useCart(isAuthenticated);
   const cartCount =
     cartData?.reduce(
       (acc: number, group: CartGroup) =>

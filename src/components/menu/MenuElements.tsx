@@ -40,9 +40,15 @@ export function StarRating({
 export function MenuCard({
   item,
   onAdd,
+  quantity = 0,
+  onIncrement,
+  onDecrement,
 }: Readonly<{
   item: MenuItem;
   onAdd?: (item: MenuItem) => void;
+  quantity?: number;
+  onIncrement?: (item: MenuItem) => void;
+  onDecrement?: (item: MenuItem) => void;
 }>) {
   return (
     <div className='shadow-card flex flex-col overflow-hidden rounded-3xl bg-white transition-all hover:shadow-md'>
@@ -52,15 +58,16 @@ export function MenuCard({
           src={item.image || '/images/placeholder.png'}
           alt={item.name}
           fill
+          sizes='(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw'
           className='object-cover'
         />
       </div>
 
       {/* Content Area */}
       <div className='flex flex-col gap-3 p-4'>
-        {/* Desktop: Name+Price LEFT, Button RIGHT vertically centered */}
         <div className='flex items-center justify-between gap-2'>
-          <div className='flex flex-col gap-0.5'>
+          {/* Left: Name + Price */}
+          <div className='flex flex-col gap-0.5 overflow-hidden'>
             <h4 className='md:text-md line-clamp-1 text-sm font-medium text-neutral-950'>
               {item.name}
             </h4>
@@ -68,24 +75,47 @@ export function MenuCard({
               Rp{item.price.toLocaleString('id-ID')}
             </span>
           </div>
-          {/* Desktop button */}
-          <button
-            type='button'
-            onClick={() => onAdd?.(item)}
-            className='bg-brand-primary text-md hidden h-10 w-20 shrink-0 items-center justify-center rounded-full font-bold tracking-tight text-white transition-opacity hover:opacity-90 md:flex'
-          >
-            Add
-          </button>
-        </div>
 
-        {/* Mobile button - full width */}
-        <button
-          type='button'
-          onClick={() => onAdd?.(item)}
-          className='bg-brand-primary flex h-9 w-full items-center justify-center rounded-full text-sm font-bold tracking-tight text-white transition-opacity hover:opacity-90 md:hidden'
-        >
-          Add
-        </button>
+          {/* Right: Action Area */}
+          <div className='h-9 w-28.5 shrink-0 md:h-10 md:w-30.75'>
+            {quantity === 0 ? (
+              <button
+                type='button'
+                onClick={() => onAdd?.(item)}
+                className='bg-brand-primary md:text-md flex size-full items-center justify-center rounded-full text-sm font-bold tracking-tight text-white transition-opacity hover:opacity-90'
+              >
+                Add
+              </button>
+            ) : (
+              <div className='flex size-full items-center justify-between'>
+                {/* Decrease Button */}
+                <button
+                  type='button'
+                  onClick={() => onDecrement?.(item)}
+                  className='flex size-9 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-950 transition-colors hover:bg-neutral-50 md:size-10'
+                  aria-label='Decrease quantity'
+                >
+                  <Icon icon='ri:subtract-line' className='size-5 md:size-6' />
+                </button>
+
+                {/* Quantity Text */}
+                <span className='text-md w-4 text-center font-bold text-neutral-950 md:text-lg'>
+                  {quantity}
+                </span>
+
+                {/* Increase Button */}
+                <button
+                  type='button'
+                  onClick={() => onIncrement?.(item)}
+                  className='bg-brand-primary flex size-9 items-center justify-center rounded-full text-white transition-opacity hover:opacity-90 md:size-10'
+                  aria-label='Increase quantity'
+                >
+                  <Icon icon='ri:add-line' className='size-5 md:size-6' />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -106,6 +136,7 @@ export function ReviewCard({ review }: Readonly<{ review: Review }>) {
               src={review.userAvatar}
               alt={review.userName}
               fill
+              sizes='(max-width: 768px) 40px, 48px'
               className='object-cover'
             />
           ) : (

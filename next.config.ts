@@ -4,7 +4,6 @@ const nextConfig: NextConfig = {
   /**
    * API Rewrites Configuration
    * Proxies requests to /api/* through Next.js to avoid CORS issues during development.
-   * The backend API is at https://be-restaurant-api-889893107835.asia-southeast2.run.app
    */
   images: {
     remotePatterns: [

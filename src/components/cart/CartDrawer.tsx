@@ -17,10 +17,15 @@ import { CartGroup, CartItemNested } from '@/types';
 type CartDrawerProps = Readonly<{
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  isAuthenticated?: boolean;
 }>;
 
-export function CartDrawer({ isOpen, onOpenChange }: CartDrawerProps) {
-  const { data: cartData, isLoading } = useCart();
+export function CartDrawer({
+  isOpen,
+  onOpenChange,
+  isAuthenticated,
+}: CartDrawerProps) {
+  const { data: cartData, isLoading } = useCart(isAuthenticated);
 
   const total =
     cartData?.reduce(
