@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import authReducer from './auth/authSlice';
 import filterReducer from './filter/filterSlice';
+import reviewReducer from './review/reviewSlice';
 
 /**
  * Root Reducer Configuration
@@ -10,6 +11,7 @@ import filterReducer from './filter/filterSlice';
 const rootReducer = {
   auth: authReducer,
   filter: filterReducer,
+  review: reviewReducer,
 };
 
 /**

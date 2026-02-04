@@ -33,11 +33,14 @@ export interface MenuItem {
 
 export interface Review {
   id: string;
+  userId: string;
   userName: string;
   userAvatar?: string;
   rating: number;
   comment: string;
   date: string;
+  transactionId?: string;
+  restaurantId?: string | number;
 }
 
 export interface RestaurantDetail extends Restaurant {
@@ -76,15 +79,47 @@ export interface CartGroup {
  * Order Types
  */
 
-export type OrderStatus = 'PENDING' | 'PREPARING' | 'DELIVERED' | 'CANCELLED';
+export type OrderStatus =
+  | 'pending'
+  | 'preparing'
+  | 'on_the_way'
+  | 'delivered'
+  | 'done'
+  | 'cancelled';
+
+export interface OrderItem {
+  menuId: number;
+  menuName: string;
+  price: number;
+  image: string;
+  quantity: number;
+  itemTotal: number;
+}
+
+export interface OrderRestaurant {
+  restaurant: {
+    id: number;
+    name: string;
+    logo: string;
+  };
+  items: OrderItem[];
+  subtotal: number;
+}
 
 export interface Order {
-  id: string;
-  restaurantId: string | number;
-  restaurantName: string;
-  restaurantImage: string;
-  totalAmount: number;
-  items: number;
+  id: number | string;
+  transactionId: string;
   status: OrderStatus;
-  date: string;
+  paymentMethod: string;
+  deliveryAddress: string;
+  phone: string;
+  pricing: {
+    subtotal: number;
+    serviceFee: number;
+    deliveryFee: number;
+    totalPrice: number;
+  };
+  restaurants: OrderRestaurant[];
+  createdAt: string;
+  updatedAt: string;
 }

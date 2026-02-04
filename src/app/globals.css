@@ -220,8 +220,22 @@
     }
   }
 
+  @keyframes highlight-reveal {
+    0% {
+      background-color: color-mix(
+        in srgb,
+        var(--color-brand-primary) 15%,
+        transparent
+      );
+    }
+    100% {
+      background-color: var(--color-base-white);
+    }
+  }
+
   --animate-cart-pop: cart-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   --animate-number-slide-up: number-slide-up 0.2s ease-out;
+  --animate-highlight-reveal: highlight-reveal 2s ease-out forwards;
 }
 
 /* ============================================ */

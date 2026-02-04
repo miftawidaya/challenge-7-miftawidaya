@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { Icon } from '@iconify/react';
 import {
@@ -36,6 +36,8 @@ import { useLocation } from '@/context/LocationContext';
 export default function RestaurantDetailPage() {
   const { id: restaurantId } = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const highlightId = searchParams.get('highlight');
   const { latitude, longitude, isLoading: isLoadingLocation } = useLocation();
 
   const isAuthenticated = useSelector(
@@ -144,6 +146,22 @@ export default function RestaurantDetailPage() {
       return () => clearTimeout(timer);
     }
   }, [cartItemCount, cartSubtotal]);
+
+  // Handle scroll to reviews if hash is present or highlighted
+  React.useEffect(() => {
+    if (
+      !isLoading &&
+      (globalThis.location.hash === '#reviews' || highlightId)
+    ) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById('reviews');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 500); // Wait for content to render and settle
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, highlightId]);
 
   const handleAddToCart = (item: MenuItem) => {
     if (!isAuthenticated) {
@@ -259,7 +277,7 @@ export default function RestaurantDetailPage() {
           </h2>
           <button
             onClick={() => router.push(ROUTES.HOME)}
-            className='text-brand-primary font-bold hover:underline'
+            className='text-brand-primary cursor-pointer font-bold hover:underline'
           >
             Back to Home
           </button>
@@ -430,7 +448,7 @@ export default function RestaurantDetailPage() {
                     setVisibleMenuCount(8);
                   }}
                   className={cn(
-                    'md:text-md h-10 rounded-full border px-4 text-sm tracking-tight whitespace-nowrap transition-all md:h-11.5 md:px-4',
+                    'md:text-md h-10 cursor-pointer rounded-full border px-4 text-sm tracking-tight whitespace-nowrap transition-all md:h-11.5 md:px-4',
                     activeCategory === cat.value
                       ? 'border-brand-primary bg-brand-primary/5 text-brand-primary font-bold'
                       : 'border-neutral-200 font-semibold text-neutral-950 hover:border-neutral-300'
@@ -479,7 +497,7 @@ export default function RestaurantDetailPage() {
       </div>
 
       {/* 4. Review Section */}
-      <section>
+      <section id='reviews'>
         <div className='custom-container mx-auto flex flex-col gap-8'>
           {/* Section Header */}
           <div className='flex flex-col gap-2 md:gap-3'>
@@ -500,7 +518,13 @@ export default function RestaurantDetailPage() {
           {/* Review List */}
           <div className='grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6'>
             {visibleReviews.map((review: Review) => (
-              <ReviewCard key={review.id} review={review} />
+              <ReviewCard
+                key={review.id}
+                review={review}
+                restaurantId={restaurantId as string}
+                restaurantName={restaurant?.name}
+                highlighted={highlightId === String(review.id)}
+              />
             ))}
 
             {/* Review Skeletons during loading more */}

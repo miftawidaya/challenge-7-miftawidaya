@@ -8,6 +8,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,13 +76,23 @@ export function ProfileMenu({
         </DropdownMenuLabel>
         <DropdownMenuSeparator className='mx-0 my-0 h-px bg-neutral-200' />
         <div className='flex flex-col gap-3'>
-          <DropdownMenuItem className='cursor-pointer gap-2 rounded-xl p-0 text-neutral-950'>
-            <MarkerPin01 className='size-5' strokeWidth={2} />
-            <span className='text-sm font-medium'>Delivery Address</span>
+          <DropdownMenuItem
+            asChild
+            className='cursor-pointer gap-2 rounded-xl p-0 text-neutral-950'
+          >
+            <Link href='/profile'>
+              <MarkerPin01 className='size-5' strokeWidth={2} />
+              <span className='text-sm font-medium'>Delivery Address</span>
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem className='cursor-pointer gap-2 rounded-xl p-0 text-neutral-900'>
-            <File05 className='size-5' strokeWidth={2} />
-            <span className='text-sm font-medium'>My Orders</span>
+          <DropdownMenuItem
+            asChild
+            className='cursor-pointer gap-2 rounded-xl p-0 text-neutral-900'
+          >
+            <Link href='/orders'>
+              <File05 className='size-5' strokeWidth={2} />
+              <span className='text-sm font-medium'>My Orders</span>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem
             className='cursor-pointer gap-2 rounded-xl p-0 text-neutral-950'

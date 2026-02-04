@@ -12,6 +12,7 @@ import type { PropsWithChildren } from 'react';
 import { usePathname } from 'next/navigation';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
+import { ReviewDialog } from '@/components/orders/ReviewDialog';
 
 type MainLayoutProps = Readonly<PropsWithChildren>;
 
@@ -20,16 +21,12 @@ export function MainLayout({ children }: MainLayoutProps) {
   const isAuthPage = pathname === '/login' || pathname === '/register';
   const isCheckoutSuccessPage = pathname === '/checkout/success';
 
-  // Pages that should not have Navbar and Footer
-  if (isAuthPage || isCheckoutSuccessPage) {
-    return <main className='min-h-screen'>{children}</main>;
-  }
-
   return (
     <div className='relative flex min-h-screen flex-col'>
-      <Navbar />
+      {!isAuthPage && !isCheckoutSuccessPage && <Navbar />}
       <main className='grow'>{children}</main>
-      <Footer />
+      {!isAuthPage && !isCheckoutSuccessPage && <Footer />}
+      <ReviewDialog />
     </div>
   );
 }

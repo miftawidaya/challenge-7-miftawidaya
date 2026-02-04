@@ -20,6 +20,17 @@ export const useRestaurantReviews = (
 };
 
 /**
+ * Hook to fetch reviews by current user
+ */
+export const useMyReviews = (enabled = true) => {
+  return useQuery<Review[]>({
+    queryKey: [...queryKeys.reviews.all, 'mine'],
+    queryFn: reviewService.getMyReviews,
+    enabled,
+  });
+};
+
+/**
  * Hook to create a new restaurant review
  * @description Invalidates the specific restaurant detail and order history to reflect the new review.
  */
@@ -28,12 +39,107 @@ export const useCreateReview = () => {
   return useMutation({
     mutationFn: reviewService.create,
     onSuccess: (_, variables) => {
-      // Invalidate the specific restaurant detail to show the new review
+      // Invalidate the restaurant's reviews list (all variations)
       queryClient.invalidateQueries({
-        queryKey: queryKeys.restaurants.detail(String(variables.restaurantId)),
+        queryKey: [
+          ...queryKeys.reviews.all,
+          'restaurant',
+          String(variables.restaurantId),
+        ],
       });
       // Invalidate orders as reviews are usually linked to past orders
       queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
+    },
+  });
+};
+
+/**
+ * Hook to update an existing review
+ */
+export const useUpdateReview = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string | number;
+      payload: { star: number; comment: string };
+      restaurantId: string | number;
+    }) => reviewService.update(id, payload),
+    onSuccess: (_, variables) => {
+      // Invalidate the specific restaurant detail to show updated rating/count
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.restaurants.detail(String(variables.restaurantId)),
+      });
+      // Invalidate the restaurant's reviews list (all variations)
+      queryClient.invalidateQueries({
+        queryKey: [
+          ...queryKeys.reviews.all,
+          'restaurant',
+          String(variables.restaurantId),
+        ],
+      });
+    },
+  });
+};
+
+/**
+ * Hook to delete a review with optimistic UI
+ */
+export const useDeleteReview = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+    }: {
+      id: string | number;
+      restaurantId: string | number;
+    }) => reviewService.delete(id),
+    onMutate: async ({ id, restaurantId }) => {
+      // Standard optimistic update pattern
+      const queryKey = [
+        ...queryKeys.reviews.all,
+        'restaurant',
+        String(restaurantId),
+      ];
+
+      // Cancel any outgoing refetches
+      // (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey });
+
+      // Snapshot the previous value
+      const previousReviews = queryClient.getQueryData<Review[]>(queryKey);
+
+      // Optimistically update to the new value
+      if (previousReviews) {
+        queryClient.setQueryData<Review[]>(
+          queryKey,
+          previousReviews.filter((r) => r.id !== String(id))
+        );
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousReviews, queryKey };
+    },
+    // If the mutation fails, use the context returned from onMutate to roll back
+    onError: (_err, _variables, context) => {
+      if (context?.previousReviews) {
+        queryClient.setQueryData(context.queryKey, context.previousReviews);
+      }
+    },
+    // Always refetch after error or success:
+    onSettled: (_data, _error, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.restaurants.detail(String(variables.restaurantId)),
+      });
+      queryClient.invalidateQueries({
+        queryKey: [
+          ...queryKeys.reviews.all,
+          'restaurant',
+          String(variables.restaurantId),
+        ],
+      });
     },
   });
 };

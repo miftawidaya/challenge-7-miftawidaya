@@ -39,3 +39,13 @@ export function calculateDistance(
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return Number((R * c).toFixed(1));
 }
+
+/**
+ * Format number to Indonesian Rupiah currency
+ * @param amount - The amount to format
+ * @returns Formatted currency string (e.g., "Rp100.000")
+ */
+export function formatCurrency(amount: number | undefined | null): string {
+  if (amount === undefined || amount === null) return 'Rp0';
+  return `Rp${amount.toLocaleString('id-ID')}`;
+}

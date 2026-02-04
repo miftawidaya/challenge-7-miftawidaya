@@ -8,6 +8,8 @@ import {
   MenuItem,
   Review,
   CartGroup,
+  Order,
+  OrderStatus,
 } from '@/types';
 
 /**
@@ -53,7 +55,17 @@ interface ApiReview {
   star?: number;
   comment?: string;
   createdAt?: string;
+  transactionId?: string;
+  transaction_id?: string;
+  restaurantId?: number | string;
+  restaurant_id?: number | string;
+  restaurant?: {
+    id: number | string;
+    name?: string;
+    logo?: string;
+  };
   user?: {
+    id: number | string;
     name?: string;
     avatar?: string | null;
   };
@@ -74,6 +86,50 @@ interface ApiCartGroup {
   };
   items: ApiCartItem[];
   subtotal: number | string;
+}
+
+interface ApiOrder {
+  id: number | string;
+  transactionId?: string;
+  transaction_id?: string;
+  status: OrderStatus;
+  paymentMethod?: string;
+  payment_method?: string;
+  deliveryAddress?: string;
+  delivery_address?: string;
+  phone?: string;
+  pricing?: {
+    subtotal?: number | string;
+    serviceFee?: number | string;
+    service_fee?: number | string;
+    deliveryFee?: number | string;
+    delivery_fee?: number | string;
+    totalPrice?: number | string;
+    total_price?: number | string;
+  };
+  restaurants?: Array<{
+    restaurant?: {
+      id: number | string;
+      name?: string;
+      logo?: string;
+    };
+    items?: Array<{
+      menuId?: number | string;
+      menu_id?: number | string;
+      menuName?: string;
+      menu_name?: string;
+      price?: number | string;
+      image?: string;
+      quantity?: number | string;
+      itemTotal?: number | string;
+      item_total?: number | string;
+    }>;
+    subtotal?: number | string;
+  }>;
+  createdAt?: string;
+  created_at?: string;
+  updatedAt?: string;
+  updated_at?: string;
 }
 
 /**
@@ -156,11 +212,50 @@ const mapMenuItem = (data: ApiMenuItem): MenuItem => ({
 
 const mapReview = (data: ApiReview): Review => ({
   id: String(data.id),
+  userId: String(data.user?.id ?? ''),
   userName: data.user?.name ?? 'Anonymous',
   userAvatar: data.user?.avatar ?? undefined,
   rating: data.star ?? 0,
   comment: data.comment ?? '',
   date: data.createdAt ?? '',
+  transactionId: data.transactionId ?? data.transaction_id,
+  restaurantId: data.restaurantId ?? data.restaurant_id ?? data.restaurant?.id,
+});
+
+const mapOrder = (data: ApiOrder): Order => ({
+  id: String(data.id),
+  transactionId: data.transactionId ?? data.transaction_id ?? String(data.id),
+  status: data.status,
+  paymentMethod: data.paymentMethod ?? data.payment_method ?? '',
+  deliveryAddress: data.deliveryAddress ?? data.delivery_address ?? '',
+  phone: data.phone ?? '',
+  pricing: {
+    subtotal: Number(data.pricing?.subtotal || 0),
+    serviceFee:
+      Number(data.pricing?.serviceFee ?? data.pricing?.service_fee) || 0,
+    deliveryFee:
+      Number(data.pricing?.deliveryFee ?? data.pricing?.delivery_fee) || 0,
+    totalPrice:
+      Number(data.pricing?.totalPrice ?? data.pricing?.total_price) || 0,
+  },
+  restaurants: (data.restaurants || []).map((or) => ({
+    restaurant: {
+      id: Number(or.restaurant?.id),
+      name: or.restaurant?.name ?? '',
+      logo: or.restaurant?.logo ?? '',
+    },
+    items: (or.items || []).map((item) => ({
+      menuId: Number(item.menuId ?? item.menu_id),
+      menuName: item.menuName ?? item.menu_name ?? '',
+      price: Number(item.price),
+      image: item.image ?? '',
+      quantity: Number(item.quantity),
+      itemTotal: Number(item.itemTotal ?? item.item_total),
+    })),
+    subtotal: Number(or.subtotal),
+  })),
+  createdAt: data.createdAt ?? data.created_at ?? '',
+  updatedAt: data.updatedAt ?? data.updated_at ?? '',
 });
 
 export const restaurantService = {
@@ -281,28 +376,38 @@ export const cartService = {
 };
 
 export const orderService = {
-  getOrders: async () => {
+  getOrders: async (): Promise<Order[]> => {
     const { data } = await axios.get(API_ENDPOINTS.ORDERS.HISTORY);
-    return data.data.orders;
+    return (data.data.orders || []).map(mapOrder);
   },
   checkout: async (payload: Record<string, unknown>) => {
     const { data } = await axios.post(API_ENDPOINTS.ORDERS.CHECKOUT, payload);
     return data.data;
   },
 };
-
 export const reviewService = {
   create: async (payload: {
+    transactionId: string;
     restaurantId: string | number;
     star: number;
     comment: string;
+    menuIds: number[];
   }) => {
-    const { data } = await axios.post(API_ENDPOINTS.REVIEWS.CREATE, payload);
+    // Normalize IDs to Numbers where expected by the backend
+    const normalizedPayload = {
+      ...payload,
+      restaurantId: Number(payload.restaurantId),
+      menuIds: payload.menuIds.map(Number),
+    };
+    const { data } = await axios.post(
+      API_ENDPOINTS.REVIEWS.CREATE,
+      normalizedPayload
+    );
     return data.data;
   },
   getMyReviews: async () => {
     const { data } = await axios.get(API_ENDPOINTS.REVIEWS.MY_REVIEWS);
-    return data.data.reviews;
+    return (data.data.reviews || []).map(mapReview);
   },
   getRestaurantReviews: async (
     restaurantId: string | number,
@@ -313,5 +418,16 @@ export const reviewService = {
       { params }
     );
     return (data.data.reviews || []).map(mapReview);
+  },
+  update: async (
+    id: string | number,
+    payload: { star: number; comment: string }
+  ) => {
+    const { data } = await axios.put(API_ENDPOINTS.REVIEWS.UPDATE(id), payload);
+    return data.data;
+  },
+  delete: async (id: string | number) => {
+    const { data } = await axios.delete(API_ENDPOINTS.REVIEWS.DELETE(id));
+    return data.data;
   },
 };
