@@ -165,7 +165,10 @@ export function ReviewCard({
     );
   };
 
-  const handleDelete = () => {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
     if (
       !restaurantId ||
       !globalThis.confirm('Are you sure you want to delete this review?')
