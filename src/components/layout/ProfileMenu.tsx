@@ -61,7 +61,7 @@ export function ProfileMenu({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className='w-dropdown z-dropdown shadow-card flex flex-col gap-3 rounded-2xl border-none p-4'
+        className='w-dropdown shadow-card flex flex-col gap-3 rounded-2xl border-none p-4'
         align='end'
         sideOffset={12}
       >

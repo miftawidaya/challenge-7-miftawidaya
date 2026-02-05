@@ -60,7 +60,7 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        'z-header fixed inset-x-0 top-0 transition-all duration-300 ease-in-out',
+        'fixed inset-x-0 top-0 z-40 transition-all duration-300 ease-in-out',
         shouldBeSolid
           ? 'h-header-mobile bg-base-white lg:h-header shadow-card'
           : 'h-header-mobile lg:h-header bg-transparent shadow-none'
