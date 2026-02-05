@@ -175,13 +175,13 @@ export function ReviewCard({
     // Start disappearing animation
     setIsDeleting(true);
 
-    // Wait for animation then delete
+    // Wait for animation then delete (500ms matches --animate-highlight-delete)
     setTimeout(() => {
       deleteReview.mutate({
         id: review.id,
         restaurantId,
       });
-    }, 300);
+    }, 500);
   };
 
   return (
@@ -191,9 +191,9 @@ export function ReviewCard({
       id={`review-${review.id}`}
       className={cn(
         'shadow-card flex flex-col gap-4 rounded-2xl p-4 transition-all duration-300',
-        !shouldAnimate && 'bg-white',
-        isDeleting && 'pointer-events-none scale-95 opacity-0',
-        shouldAnimate && 'animate-highlight-reveal'
+        !shouldAnimate && !isDeleting && 'bg-white',
+        isDeleting && 'animate-highlight-delete pointer-events-none',
+        shouldAnimate && !isDeleting && 'animate-highlight-reveal'
       )}
     >
       {/* Header: Avatar + Info + Actions */}

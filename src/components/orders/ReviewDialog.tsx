@@ -193,7 +193,7 @@ export function ReviewDialog() {
     >
       <DialogContent
         showCloseButton={false}
-        className='flex w-full max-w-90 flex-col items-center gap-4 rounded-2xl border-0 p-4 md:max-w-110 md:gap-6 md:p-6'
+        className='flex w-full max-w-[calc(100%-2rem)] flex-col items-center gap-4 rounded-2xl border-0 p-4 sm:max-w-110 md:gap-6 md:p-6'
       >
         {/* Header */}
         <div className='flex w-full items-center justify-between'>
