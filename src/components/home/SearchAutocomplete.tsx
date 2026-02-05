@@ -18,7 +18,7 @@ export function SearchAutocomplete({
   query,
   isOpen,
   onClose,
-}: SearchAutocompleteProps) {
+}: Readonly<SearchAutocompleteProps>) {
   const [debouncedQuery, setDebouncedQuery] = React.useState(query);
 
   React.useEffect(() => {

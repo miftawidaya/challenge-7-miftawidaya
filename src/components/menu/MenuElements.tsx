@@ -165,26 +165,30 @@ export function ReviewCard({
     );
   };
 
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleDelete = (e: React.BaseSyntheticEvent) => {
     e.stopPropagation();
     e.preventDefault();
 
-    if (
-      !restaurantId ||
-      !globalThis.confirm('Are you sure you want to delete this review?')
-    )
-      return;
-
-    // Start disappearing animation
-    setIsDeleting(true);
-
-    // Wait for animation then delete (500ms matches --animate-highlight-delete)
+    // Use a small delay to ensure the event is fully processed before blocking
+    // This fixes issues where some browsers close the confirm dialog immediately
     setTimeout(() => {
-      deleteReview.mutate({
-        id: review.id,
-        restaurantId,
-      });
-    }, 500);
+      if (
+        !restaurantId ||
+        !globalThis.confirm('Are you sure you want to delete this review?')
+      )
+        return;
+
+      // Start disappearing animation
+      setIsDeleting(true);
+
+      // Wait for animation then delete (500ms matches --animate-highlight-delete)
+      setTimeout(() => {
+        deleteReview.mutate({
+          id: review.id,
+          restaurantId,
+        });
+      }, 500);
+    }, 0);
   };
 
   return (
@@ -234,6 +238,7 @@ export function ReviewCard({
         {isOwner && (
           <div className='flex items-center gap-1 md:gap-2'>
             <button
+              type='button'
               onClick={handleEdit}
               className='hover:text-brand-primary cursor-pointer p-1 text-neutral-400 transition-colors'
               aria-label='Edit review'
@@ -241,6 +246,7 @@ export function ReviewCard({
               <Pencil02 className='size-4.5' />
             </button>
             <button
+              type='button'
               onClick={handleDelete}
               className='hover:text-brand-primary cursor-pointer p-1 text-neutral-400 transition-colors'
               aria-label='Delete review'
