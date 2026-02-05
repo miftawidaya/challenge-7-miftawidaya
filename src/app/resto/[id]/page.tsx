@@ -147,21 +147,26 @@ export default function RestaurantDetailPage() {
     }
   }, [cartItemCount, cartSubtotal]);
 
-  // Handle scroll to reviews if hash is present or highlighted
+  // Ensure highlighted review is within visible count
   React.useEffect(() => {
-    if (
-      !isLoading &&
-      (globalThis.location.hash === '#reviews' || highlightId)
-    ) {
-      const timer = setTimeout(() => {
-        const element = document.getElementById('reviews');
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 500); // Wait for content to render and settle
-      return () => clearTimeout(timer);
+    if (highlightId && (reviewsData || restaurant?.reviews)) {
+      const list = reviewsData || restaurant?.reviews || [];
+      const idx = list.findIndex((r: Review) => String(r.id) === highlightId);
+      if (idx !== -1 && idx >= visibleReviewCount) {
+        setVisibleReviewCount(idx + 1);
+      }
     }
-  }, [isLoading, highlightId]);
+  }, [highlightId, reviewsData, restaurant?.reviews, visibleReviewCount]);
+
+  // Simple hash-based navigation - let browser handle the jump
+  React.useEffect(() => {
+    if (!isLoading && globalThis.location.hash === '#reviews') {
+      const element = document.getElementById('reviews');
+      if (element) {
+        element.scrollIntoView();
+      }
+    }
+  }, [isLoading]);
 
   const handleAddToCart = (item: MenuItem) => {
     if (!isAuthenticated) {

@@ -47,6 +47,10 @@ export const useCreateReview = () => {
           String(variables.restaurantId),
         ],
       });
+      // Invalidate my reviews - critical for My Orders page to update
+      queryClient.invalidateQueries({
+        queryKey: [...queryKeys.reviews.all, 'mine'],
+      });
       // Invalidate orders as reviews are usually linked to past orders
       queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
     },
@@ -67,7 +71,39 @@ export const useUpdateReview = () => {
       payload: { star: number; comment: string };
       restaurantId: string | number;
     }) => reviewService.update(id, payload),
-    onSuccess: (_, variables) => {
+    onMutate: async ({ id, payload, restaurantId }) => {
+      // Cancel outgoing refetches
+      const queryKey = [
+        ...queryKeys.reviews.all,
+        'restaurant',
+        String(restaurantId),
+      ];
+      await queryClient.cancelQueries({ queryKey });
+
+      // Snapshot previous value
+      const previousReviews = queryClient.getQueryData<Review[]>(queryKey);
+
+      // Optimistically update
+      if (previousReviews) {
+        queryClient.setQueryData<Review[]>(
+          queryKey,
+          previousReviews.map((r) =>
+            r.id === String(id)
+              ? { ...r, rating: payload.star, comment: payload.comment }
+              : r
+          )
+        );
+      }
+
+      return { previousReviews, queryKey };
+    },
+    onError: (_err, _variables, context) => {
+      // Rollback on error
+      if (context?.previousReviews) {
+        queryClient.setQueryData(context.queryKey, context.previousReviews);
+      }
+    },
+    onSettled: (_, _error, variables) => {
       // Invalidate the specific restaurant detail to show updated rating/count
       queryClient.invalidateQueries({
         queryKey: queryKeys.restaurants.detail(String(variables.restaurantId)),
@@ -79,6 +115,10 @@ export const useUpdateReview = () => {
           'restaurant',
           String(variables.restaurantId),
         ],
+      });
+      // Invalidate my reviews for consistency
+      queryClient.invalidateQueries({
+        queryKey: [...queryKeys.reviews.all, 'mine'],
       });
     },
   });
@@ -130,9 +170,11 @@ export const useDeleteReview = () => {
     },
     // Always refetch after error or success:
     onSettled: (_data, _error, variables) => {
+      // Invalidate restaurant detail
       queryClient.invalidateQueries({
         queryKey: queryKeys.restaurants.detail(String(variables.restaurantId)),
       });
+      // Invalidate restaurant reviews
       queryClient.invalidateQueries({
         queryKey: [
           ...queryKeys.reviews.all,
@@ -140,6 +182,12 @@ export const useDeleteReview = () => {
           String(variables.restaurantId),
         ],
       });
+      // Invalidate my reviews - critical for My Orders page to update
+      queryClient.invalidateQueries({
+        queryKey: [...queryKeys.reviews.all, 'mine'],
+      });
+      // Invalidate orders to update review status
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
     },
   });
 };

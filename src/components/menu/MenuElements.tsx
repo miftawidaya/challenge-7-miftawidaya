@@ -132,8 +132,24 @@ export function ReviewCard({
   const currentUser = useAppSelector((state) => state.auth.user);
   const deleteReview = useDeleteReview();
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const [shouldAnimate, setShouldAnimate] = React.useState(highlighted);
+  const cardRef = React.useRef<HTMLDivElement>(null);
 
   const isOwner = currentUser && String(currentUser.id) === review.userId;
+
+  // Force animation restart when highlighted changes
+  React.useEffect(() => {
+    if (highlighted && cardRef.current) {
+      // Remove animation class
+      setShouldAnimate(false);
+      // Force reflow
+      const _reflow = cardRef.current.offsetHeight;
+      // Re-add animation class
+      requestAnimationFrame(() => {
+        setShouldAnimate(true);
+      });
+    }
+  }, [highlighted]);
 
   const handleEdit = () => {
     if (!restaurantId || !restaurantName) return;
@@ -170,10 +186,14 @@ export function ReviewCard({
 
   return (
     <div
+      ref={cardRef}
+      key={`review-${review.id}-${highlighted ? 'hl' : 'normal'}`}
+      id={`review-${review.id}`}
       className={cn(
-        'shadow-card flex flex-col gap-4 rounded-2xl bg-white p-4 transition-all duration-300',
+        'shadow-card flex flex-col gap-4 rounded-2xl p-4 transition-all duration-300',
+        !shouldAnimate && 'bg-white',
         isDeleting && 'pointer-events-none scale-95 opacity-0',
-        highlighted && 'animate-highlight-reveal'
+        shouldAnimate && 'animate-highlight-reveal'
       )}
     >
       {/* Header: Avatar + Info + Actions */}

@@ -19,6 +19,7 @@ import { queryKeys } from '@/services/queries/keys';
 import { reviewService, restaurantService } from '@/services/api';
 import {
   closeReviewModal,
+  openReviewModal,
   resetReview,
   setReviewError,
   updateReviewData,
@@ -36,6 +37,7 @@ export function ReviewDialog() {
     isOpen,
     mode,
     restaurantId,
+    restaurantName,
     transactionId,
     reviewId,
     menuIds,
@@ -89,26 +91,54 @@ export function ReviewDialog() {
       // Validate with Zod
       reviewSchema.parse({ star: rating, comment });
 
+      // Close modal IMMEDIATELY for optimistic UX
+      dispatch(closeReviewModal());
+
+      const targetReviewId = isEditMode ? reviewId : undefined;
+      const highlightParam = targetReviewId
+        ? `?highlight=${String(targetReviewId)}&t=${Date.now()}`
+        : '';
+
+      // Detect if we are already on the restaurant detail page
+      const isAtRestoPage =
+        globalThis.window?.location.pathname === `/resto/${restaurantId}`;
+
+      // Navigate immediately
+      const finalUrl = `/resto/${restaurantId}${highlightParam}${isAtRestoPage ? '' : '#reviews'}`;
+      router.push(finalUrl, { scroll: false });
+
+      // Reset form
+      dispatch(resetReview());
+
       const mutationOptions = {
         onSuccess: (data: { id: string | number }) => {
-          const newReviewId = data?.id;
-
-          // Optimistic: Close modal and redirect
-          dispatch(closeReviewModal());
+          // For new reviews, update URL with the new review ID
           if (!isEditMode) {
-            const highlightParam = newReviewId
-              ? `?highlight=${newReviewId}`
-              : '';
-            router.push(`/resto/${restaurantId}${highlightParam}#reviews`);
+            const newReviewId = data?.id;
+            if (newReviewId) {
+              const newUrl = `/resto/${restaurantId}?highlight=${String(newReviewId)}&t=${Date.now()}${isAtRestoPage ? '' : '#reviews'}`;
+              router.replace(newUrl, { scroll: false });
+            }
           }
-
-          dispatch(resetReview());
         },
         onError: (err: unknown) => {
           const errorMessage =
             (err as { response?: { data?: { message?: string } } })?.response
               ?.data?.message || 'Failed to submit review. Please try again.';
+
+          // Reopen modal with error on failure
           dispatch(setReviewError(errorMessage));
+          dispatch(
+            openReviewModal({
+              mode: isEditMode ? 'edit' : 'create',
+              ...(isEditMode && reviewId ? { reviewId } : {}),
+              restaurantId,
+              restaurantName: restaurantName || '',
+              ...(isEditMode ? { rating, comment } : {}),
+              ...(transactionId ? { transactionId } : {}),
+              ...(menuIds ? { menuIds } : {}),
+            })
+          );
         },
       };
 
