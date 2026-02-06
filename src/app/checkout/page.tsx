@@ -13,6 +13,9 @@ import {
   useUpdateCartQuantity,
   useRemoveFromCart,
 } from '@/services/queries';
+import { queryKeys } from '@/services/queries/keys';
+import { cartService } from '@/services/api';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { RootState } from '@/features/store';
 import { ROUTES } from '@/config/routes';
@@ -63,6 +66,7 @@ function CheckoutContent() {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const { data: cartData, isLoading: isCartLoading } = useCart(isAuthenticated);
   const checkout = useCheckout();
+  const queryClient = useQueryClient();
   const updateQuantity = useUpdateCartQuantity();
   const removeFromCart = useRemoveFromCart();
 
@@ -138,12 +142,41 @@ function CheckoutContent() {
 
     try {
       setIsRedirecting(true);
-      // Use mutateAsync to wait for mutation + onSuccess (cache invalidation) to complete
-      await checkout.mutateAsync(payload);
-      router.push(ROUTES.CHECKOUT_SUCCESS);
-    } catch {
+      // 1. Placement of order
+      // Note: Backend doesn't automatically clear cart on checkout
+      const response = await checkout.mutateAsync(payload);
+
+      // 2. Extract item IDs from the filtered cart data that we just checked out
+      const itemIdsToRemove = filteredCartData.flatMap((group: CartGroup) =>
+        group.items.map((item: CartItemNested) => item.id)
+      );
+
+      // 3. Manually remove items from cart on the backend
+      if (itemIdsToRemove.length > 0) {
+        try {
+          // Promise.allSettled to ensure we try to remove all even if one fails
+          await Promise.allSettled(
+            itemIdsToRemove.map((id) => cartService.removeFromCart(id))
+          );
+          // Invalidate cart to get final fresh state from server
+          await queryClient.invalidateQueries({ queryKey: queryKeys.cart.all });
+        } catch (error) {
+          console.error('Failed to clear some cart items:', error);
+        }
+      }
+
+      // 4. Redirect to success page
+      const transactionId =
+        response.transaction?.transactionId || response.transaction?.id;
+
+      const successUrl = transactionId
+        ? `${ROUTES.CHECKOUT_SUCCESS}?id=${transactionId}`
+        : ROUTES.CHECKOUT_SUCCESS;
+
+      router.push(successUrl);
+    } catch (error) {
+      console.error('Checkout failed:', error);
       setIsRedirecting(false); // Reset on error so we can try again
-      // Error handling is done by mutation's onError if needed
     }
   };
 
@@ -404,10 +437,10 @@ function CheckoutContent() {
             </div>
             <Button
               onClick={handleCheckout}
-              disabled={checkout.isPending}
+              disabled={checkout.isPending || isRedirecting}
               className='text-md h-12 w-full rounded-full font-bold'
             >
-              {checkout.isPending ? 'Processing...' : 'Buy'}
+              {checkout.isPending || isRedirecting ? 'Processing...' : 'Buy'}
             </Button>
           </section>
         </div>
@@ -510,10 +543,10 @@ function CheckoutContent() {
               </div>
               <Button
                 onClick={handleCheckout}
-                disabled={checkout.isPending}
+                disabled={checkout.isPending || isRedirecting}
                 className='text-md mt-2 h-12 w-full rounded-full font-bold'
               >
-                {checkout.isPending ? 'Processing...' : 'Buy'}
+                {checkout.isPending || isRedirecting ? 'Processing...' : 'Buy'}
               </Button>
             </div>
           </div>

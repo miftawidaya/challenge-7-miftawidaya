@@ -1,33 +1,73 @@
 'use client';
 
+import * as React from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Icon } from '@iconify/react';
+import dayjs from 'dayjs';
+import 'dayjs/locale/id';
 
 import { Logo } from '@/components/icons/Logo';
 import { ROUTES } from '@/config/routes';
+import { useOrders } from '@/services/queries/orders';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * CheckoutSuccessPage
  * @description Displays a payment success confirmation with order details.
- * Design follows Figma specifications with responsive layout for desktop and mobile.
- * This page has no Navbar or Footer per design requirements.
+ * Wraps the content in Suspense to handle useSearchParams() during build/SSR.
  */
 export default function CheckoutSuccessPage() {
-  // Placeholder data - In production, this would come from the checkout state or API
-  const orderDetails = {
-    date: '25 August 2025, 15:51',
-    paymentMethod: 'Bank Rakyat Indonesia',
-    itemCount: 2,
-    price: 100000,
-    deliveryFee: 10000,
-    serviceFee: 1000,
-  };
+  return (
+    <React.Suspense fallback={<SuccessSkeleton />}>
+      <SuccessContent />
+    </React.Suspense>
+  );
+}
 
-  const total =
-    orderDetails.price + orderDetails.deliveryFee + orderDetails.serviceFee;
+function SuccessContent() {
+  const searchParams = useSearchParams();
+  const transactionId = searchParams.get('id');
+  const { data: orders, isLoading } = useOrders();
+
+  // Find the specific order that matches the transaction ID
+  const order = orders?.find(
+    (o) =>
+      String(o.transactionId) === transactionId ||
+      String(o.id) === transactionId
+  );
+
+  // If loading or searching for the order
+  if (isLoading || (transactionId && !order)) {
+    return <SuccessSkeleton />;
+  }
+
+  // Fallback if no order found
+  const orderDetails = order
+    ? {
+        date: dayjs(order.createdAt).locale('id').format('D MMMM YYYY, HH:mm'),
+        paymentMethod: order.paymentMethod,
+        itemCount: order.restaurants.reduce(
+          (acc, r) => acc + r.items.reduce((sum, i) => sum + i.quantity, 0),
+          0
+        ),
+        subtotal: order.pricing.subtotal,
+        deliveryFee: order.pricing.deliveryFee,
+        serviceFee: order.pricing.serviceFee,
+        total: order.pricing.totalPrice,
+      }
+    : {
+        date: dayjs().locale('id').format('D MMMM YYYY, HH:mm'),
+        paymentMethod: '-',
+        itemCount: 0,
+        subtotal: 0,
+        deliveryFee: 0,
+        serviceFee: 0,
+        total: 0,
+      };
 
   return (
-    <div className='flex min-h-screen flex-col items-center bg-neutral-50 px-4 py-32 md:py-52'>
+    <div className='flex min-h-screen flex-col items-center justify-center bg-neutral-50 px-4 py-8'>
       {/* Main Container */}
       <div className='flex w-full max-w-107 flex-col items-center gap-7'>
         {/* Logo Header */}
@@ -64,7 +104,9 @@ export default function CheckoutSuccessPage() {
               Payment Success
             </h1>
             <p className='md:text-md text-center text-sm font-normal tracking-tight text-neutral-950'>
-              Your payment has been successfully processed.
+              {order
+                ? 'Your payment has been successfully processed.'
+                : 'Could not retrieve your recent order details, but your payment was successful.'}
             </p>
           </div>
 
@@ -88,7 +130,7 @@ export default function CheckoutSuccessPage() {
               <span className='md:text-md text-sm font-medium text-neutral-950'>
                 Payment Method
               </span>
-              <span className='md:text-md text-sm font-semibold tracking-tight text-neutral-950 md:font-bold'>
+              <span className='md:text-md text-right text-sm font-semibold tracking-tight text-neutral-950 md:font-bold'>
                 {orderDetails.paymentMethod}
               </span>
             </div>
@@ -99,7 +141,7 @@ export default function CheckoutSuccessPage() {
                 Price ({orderDetails.itemCount} items)
               </span>
               <span className='md:text-md text-sm font-semibold tracking-tight text-neutral-950 md:font-bold'>
-                Rp{orderDetails.price.toLocaleString('id-ID')}
+                Rp{orderDetails.subtotal.toLocaleString('id-ID')}
               </span>
             </div>
 
@@ -133,7 +175,7 @@ export default function CheckoutSuccessPage() {
               Total
             </span>
             <span className='text-md font-extrabold text-neutral-950 md:text-lg'>
-              Rp{total.toLocaleString('id-ID')}
+              Rp{orderDetails.total.toLocaleString('id-ID')}
             </span>
           </div>
 
@@ -144,6 +186,49 @@ export default function CheckoutSuccessPage() {
           >
             See My Orders
           </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SuccessSkeleton() {
+  return (
+    <div className='flex min-h-screen flex-col items-center bg-neutral-50 px-4 py-32 md:py-52'>
+      <div className='flex w-full max-w-107 flex-col items-center gap-7'>
+        {/* Logo Placeholder */}
+        <div className='flex items-center gap-3.75'>
+          <Skeleton className='size-10.5 rounded-full' />
+          <Skeleton className='h-8 w-24 rounded-lg' />
+        </div>
+
+        {/* Card Skeleton */}
+        <div className='shadow-card flex w-full flex-col items-center gap-6 rounded-2xl bg-white p-5'>
+          <div className='flex flex-col items-center gap-2'>
+            <Skeleton className='size-16 rounded-full' />
+            <Skeleton className='h-7 w-48 rounded-lg' />
+            <Skeleton className='h-5 w-64 rounded-lg' />
+          </div>
+
+          <div className='w-full border-t border-dashed border-neutral-200' />
+
+          <div className='flex w-full flex-col gap-3'>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className='flex justify-between'>
+                <Skeleton className='h-5 w-24 rounded-md' />
+                <Skeleton className='h-5 w-32 rounded-md' />
+              </div>
+            ))}
+          </div>
+
+          <div className='w-full border-t border-dashed border-neutral-200' />
+
+          <div className='flex w-full justify-between'>
+            <Skeleton className='h-7 w-20 rounded-md' />
+            <Skeleton className='h-7 w-32 rounded-md' />
+          </div>
+
+          <Skeleton className='h-12 w-full rounded-full' />
         </div>
       </div>
     </div>
