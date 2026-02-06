@@ -120,7 +120,8 @@ export function HeroSection() {
           alt='Delicious food background'
           fill
           className='object-cover object-center'
-          priority
+          preload
+          fetchPriority='high'
           sizes='100vw'
         />
         {/* Gradient Overlay */}

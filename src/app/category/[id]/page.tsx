@@ -151,6 +151,7 @@ export default function CategoryPage() {
           restaurants={visibleRestaurants}
           isLoading={false}
           columns={2}
+          enablePriority
         />
       );
     }

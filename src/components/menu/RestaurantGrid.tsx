@@ -10,6 +10,7 @@ interface RestaurantGridProps {
   isLoading?: boolean;
   className?: string;
   columns?: number;
+  enablePriority?: boolean;
 }
 
 export function RestaurantGrid({
@@ -17,6 +18,7 @@ export function RestaurantGrid({
   isLoading,
   className,
   columns = 3,
+  enablePriority = false,
 }: Readonly<RestaurantGridProps>) {
   if (isLoading) {
     return (
@@ -59,8 +61,12 @@ export function RestaurantGrid({
         className
       )}
     >
-      {restaurants.map((restaurant) => (
-        <RestaurantCard key={restaurant.id} restaurant={restaurant} />
+      {restaurants.map((restaurant, index) => (
+        <RestaurantCard
+          key={restaurant.id}
+          restaurant={restaurant}
+          preload={enablePriority && index < 4}
+        />
       ))}
     </div>
   );

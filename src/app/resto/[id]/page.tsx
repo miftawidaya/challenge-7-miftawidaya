@@ -309,7 +309,8 @@ export default function RestaurantDetailPage() {
                 fill
                 sizes='(max-width: 768px) 100vw, 66vw'
                 className='object-cover'
-                priority
+                preload
+                fetchPriority='high'
               />
             </div>
             <div className='flex h-full w-110 flex-col gap-4'>
@@ -353,7 +354,8 @@ export default function RestaurantDetailPage() {
               fill
               sizes='(max-width: 768px) 100vw, 800px'
               className='object-cover'
-              priority
+              preload
+              fetchPriority='high'
             />
           </div>
         </div>

@@ -14,9 +14,14 @@ import { DEFAULT_DISTANCE } from '@/config/constants';
 type RestaurantCardProps = Readonly<{
   restaurant: Restaurant;
   className?: string;
+  preload?: boolean;
 }>;
 
-export function RestaurantCard({ restaurant, className }: RestaurantCardProps) {
+export function RestaurantCard({
+  restaurant,
+  className,
+  preload = false,
+}: RestaurantCardProps) {
   const { latitude: userLat, longitude: userLng } = useLocation();
 
   // Background hydration: Fetch detail if coordinates are missing
@@ -74,6 +79,8 @@ export function RestaurantCard({ restaurant, className }: RestaurantCardProps) {
           src={restaurant.logo}
           alt={restaurant.name}
           fill
+          preload={preload}
+          fetchPriority={preload ? 'high' : 'auto'}
           className='object-cover transition-transform duration-500 group-hover:scale-105'
           sizes='(max-width: 768px) 90px, 120px'
           fallbackIconSize='sm'

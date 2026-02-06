@@ -28,14 +28,20 @@ export function ImageWithFallback({
   className,
   fallbackIconSize = 'md',
   ...props
-}: ImageWithFallbackProps) {
+}: Readonly<ImageWithFallbackProps>) {
   const [hasError, setHasError] = React.useState(false);
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const imgRef = React.useRef<HTMLImageElement>(null);
 
-  // Reset error state when src changes
+  // Reset error state and check if already complete when src changes
   React.useEffect(() => {
     setHasError(false);
-    setIsLoaded(false);
+    // If the image is already in cache, it might be complete immediately
+    if (imgRef.current?.complete) {
+      setIsLoaded(true);
+    } else {
+      setIsLoaded(false);
+    }
   }, [src]);
 
   const showFallback = !src || hasError;
@@ -76,12 +82,17 @@ export function ImageWithFallback({
         </div>
       )}
       <Image
+        ref={imgRef}
         src={src}
         alt={alt}
         sizes={props.sizes ?? '(max-width: 768px) 100vw, 50vw'}
         className={cn(className, !isLoaded && 'opacity-0')}
         onError={() => setHasError(true)}
-        onLoad={() => setIsLoaded(true)}
+        onLoad={(e) => {
+          if (e.currentTarget.complete) {
+            setIsLoaded(true);
+          }
+        }}
         {...props}
       />
     </>

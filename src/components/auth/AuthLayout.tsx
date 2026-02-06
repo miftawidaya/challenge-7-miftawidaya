@@ -28,7 +28,8 @@ export function AuthLayout({
           alt='Auth Background'
           fill
           className='object-cover object-center'
-          priority
+          preload
+          fetchPriority='high'
         />
       </div>
 
